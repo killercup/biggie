@@ -1,8 +1,12 @@
 {
   "name": "biggie",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "description": "presentations without thinking",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/killercup/biggie.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,7 +19,9 @@
     "underscore": "~1.4.4",
     "browserify": "~2.14.1"
   },
-  "repository": "",
   "author": "Tom MacWright <tom@macwright.org>",
+  "contributors": [
+    "Pascal Hertleif"
+  ],
   "license": "BSD"
 }
