@@ -20,7 +20,12 @@ marked.setOptions({
 // load JS support for CodeMirror
 require('./markdown')(CodeMirror);
 
-var editor = CodeMirror.fromTextArea(document.getElementById('content'), {
+var content = document.getElementById('content');
+if (localStorage.slidesCode) {
+    content.value = localStorage.slidesCode;
+}
+
+var editor = CodeMirror.fromTextArea(content, {
     mode: 'markdown',
     lineWrapping: true,
     tabSize: 2
@@ -93,6 +98,7 @@ function makeSlides() {
 
 function change() {
     slides.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(makeSlides());
+    localStorage.slidesCode = editor.getValue();
 }
 
 change();
@@ -9094,7 +9100,81 @@ hljs.LANGUAGES['clojure'] = require('./clojure.js')(hljs);
 hljs.LANGUAGES['go'] = require('./go.js')(hljs);
 module.exports = hljs;
 })()
-},{"./bash.js":11,"./erlang.js":12,"./cs.js":13,"./brainfuck.js":14,"./ruby.js":15,"./rust.js":16,"./rib.js":17,"./diff.js":18,"./javascript.js":19,"./glsl.js":20,"./rsl.js":21,"./lua.js":22,"./xml.js":23,"./markdown.js":24,"./css.js":25,"./lisp.js":26,"./profile.js":27,"./http.js":28,"./java.js":29,"./php.js":30,"./haskell.js":31,"./1c.js":32,"./python.js":33,"./smalltalk.js":34,"./tex.js":35,"./actionscript.js":36,"./sql.js":37,"./vala.js":38,"./ini.js":39,"./d.js":40,"./axapta.js":41,"./perl.js":42,"./scala.js":43,"./cmake.js":44,"./objectivec.js":45,"./avrasm.js":46,"./vhdl.js":47,"./coffeescript.js":48,"./nginx.js":49,"./erlang-repl.js":50,"./r.js":51,"./json.js":52,"./django.js":53,"./delphi.js":54,"./vbscript.js":55,"./mel.js":56,"./dos.js":57,"./apache.js":58,"./applescript.js":59,"./cpp.js":60,"./matlab.js":61,"./parser3.js":62,"./clojure.js":63,"./go.js":64}],11:[function(require,module,exports){
+},{"./bash.js":11,"./erlang.js":12,"./cs.js":13,"./brainfuck.js":14,"./ruby.js":15,"./rust.js":16,"./rib.js":17,"./diff.js":18,"./javascript.js":19,"./glsl.js":20,"./rsl.js":21,"./lua.js":22,"./xml.js":23,"./markdown.js":24,"./css.js":25,"./lisp.js":26,"./profile.js":27,"./http.js":28,"./java.js":29,"./php.js":30,"./haskell.js":31,"./1c.js":32,"./python.js":33,"./smalltalk.js":34,"./tex.js":35,"./actionscript.js":36,"./sql.js":37,"./vala.js":38,"./ini.js":39,"./d.js":40,"./axapta.js":41,"./perl.js":42,"./scala.js":43,"./cmake.js":44,"./objectivec.js":45,"./avrasm.js":46,"./vhdl.js":47,"./coffeescript.js":48,"./nginx.js":49,"./erlang-repl.js":50,"./r.js":51,"./json.js":52,"./django.js":53,"./delphi.js":54,"./vbscript.js":55,"./mel.js":56,"./apache.js":57,"./applescript.js":58,"./cpp.js":59,"./dos.js":60,"./matlab.js":61,"./parser3.js":62,"./clojure.js":63,"./go.js":64}],14:[function(require,module,exports){
+module.exports = function(hljs){
+  return {
+    contains: [
+      {
+        className: 'comment',
+        begin: '[^\\[\\]\\.,\\+\\-<> \r\n]',
+        excludeEnd: true,
+        end: '[\\[\\]\\.,\\+\\-<> \r\n]',
+        relevance: 0
+      },
+      {
+        className: 'title',
+        begin: '[\\[\\]]',
+        relevance: 0
+      },
+      {
+        className: 'string',
+        begin: '[\\.,]'
+      },
+      {
+        className: 'literal',
+        begin: '[\\+\\-]'
+      }
+    ]
+  };
+};
+},{}],13:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    keywords:
+      // Normal keywords.
+      'abstract as base bool break byte case catch char checked class const continue decimal ' +
+      'default delegate do double else enum event explicit extern false finally fixed float ' +
+      'for foreach goto if implicit in int interface internal is lock long namespace new null ' +
+      'object operator out override params private protected public readonly ref return sbyte ' +
+      'sealed short sizeof stackalloc static string struct switch this throw true try typeof ' +
+      'uint ulong unchecked unsafe ushort using virtual volatile void while ' +
+      // Contextual keywords.
+      'ascending descending from get group into join let orderby partial select set value var '+
+      'where yield',
+    contains: [
+      {
+        className: 'comment',
+        begin: '///', end: '$', returnBegin: true,
+        contains: [
+          {
+            className: 'xmlDocTag',
+            begin: '///|<!--|-->'
+          },
+          {
+            className: 'xmlDocTag',
+            begin: '</?', end: '>'
+          }
+        ]
+      },
+      hljs.C_LINE_COMMENT_MODE,
+      hljs.C_BLOCK_COMMENT_MODE,
+      {
+        className: 'preprocessor',
+        begin: '#', end: '$',
+        keywords: 'if else elif endif define undef warning error line region endregion pragma checksum'
+      },
+      {
+        className: 'string',
+        begin: '@"', end: '"',
+        contains: [{begin: '""'}]
+      },
+      hljs.APOS_STRING_MODE,
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_NUMBER_MODE
+    ]
+  };
+};
+},{}],11:[function(require,module,exports){
 module.exports = function(hljs) {
   var BASH_LITERAL = 'true false';
   var BASH_KEYWORD = 'if then else elif fi for break continue while in do done echo exit return set declare';
@@ -9305,76 +9385,137 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = function(hljs) {
+  var TITLE = {
+    className: 'title',
+    begin: hljs.UNDERSCORE_IDENT_RE
+  };
+  var NUMBER = {
+    className: 'number',
+    begin: '\\b(0[xb][A-Za-z0-9_]+|[0-9_]+(\\.[0-9_]+)?([uif](8|16|32|64)?)?)',
+    relevance: 0
+  };
+  var KEYWORDS =
+    'alt any as assert be bind block bool break char check claim const cont dir do else enum ' +
+    'export f32 f64 fail false float fn for i16 i32 i64 i8 if iface impl import in int let ' +
+    'log mod mutable native note of prove pure resource ret self str syntax true type u16 u32 ' +
+    'u64 u8 uint unchecked unsafe use vec while';
   return {
-    keywords:
-      // Normal keywords.
-      'abstract as base bool break byte case catch char checked class const continue decimal ' +
-      'default delegate do double else enum event explicit extern false finally fixed float ' +
-      'for foreach goto if implicit in int interface internal is lock long namespace new null ' +
-      'object operator out override params private protected public readonly ref return sbyte ' +
-      'sealed short sizeof stackalloc static string struct switch this throw true try typeof ' +
-      'uint ulong unchecked unsafe ushort using virtual volatile void while ' +
-      // Contextual keywords.
-      'ascending descending from get group into join let orderby partial select set value var '+
-      'where yield',
+    keywords: KEYWORDS,
+    illegal: '</',
     contains: [
-      {
-        className: 'comment',
-        begin: '///', end: '$', returnBegin: true,
-        contains: [
-          {
-            className: 'xmlDocTag',
-            begin: '///|<!--|-->'
-          },
-          {
-            className: 'xmlDocTag',
-            begin: '</?', end: '>'
-          }
-        ]
-      },
       hljs.C_LINE_COMMENT_MODE,
       hljs.C_BLOCK_COMMENT_MODE,
+      hljs.inherit(hljs.QUOTE_STRING_MODE, {illegal: null}),
+      hljs.APOS_STRING_MODE,
+      NUMBER,
+      {
+        className: 'function',
+        beginWithKeyword: true, end: '(\\(|<)',
+        keywords: 'fn',
+        contains: [TITLE]
+      },
       {
         className: 'preprocessor',
-        begin: '#', end: '$',
-        keywords: 'if else elif endif define undef warning error line region endregion pragma checksum'
+        begin: '#\\[', end: '\\]'
       },
       {
-        className: 'string',
-        begin: '@"', end: '"',
-        contains: [{begin: '""'}]
+        beginWithKeyword: true, end: '(=|<)',
+        keywords: 'type',
+        contains: [TITLE],
+        illegal: '\\S'
       },
-      hljs.APOS_STRING_MODE,
-      hljs.QUOTE_STRING_MODE,
-      hljs.C_NUMBER_MODE
+      {
+        beginWithKeyword: true, end: '({|<)',
+        keywords: 'iface enum',
+        contains: [TITLE],
+        illegal: '\\S'
+      }
     ]
   };
 };
-},{}],14:[function(require,module,exports){
-module.exports = function(hljs){
+},{}],17:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    keywords:
+      'ArchiveRecord AreaLightSource Atmosphere Attribute AttributeBegin AttributeEnd Basis ' +
+      'Begin Blobby Bound Clipping ClippingPlane Color ColorSamples ConcatTransform Cone ' +
+      'CoordinateSystem CoordSysTransform CropWindow Curves Cylinder DepthOfField Detail ' +
+      'DetailRange Disk Displacement Display End ErrorHandler Exposure Exterior Format ' +
+      'FrameAspectRatio FrameBegin FrameEnd GeneralPolygon GeometricApproximation Geometry ' +
+      'Hider Hyperboloid Identity Illuminate Imager Interior LightSource ' +
+      'MakeCubeFaceEnvironment MakeLatLongEnvironment MakeShadow MakeTexture Matte ' +
+      'MotionBegin MotionEnd NuPatch ObjectBegin ObjectEnd ObjectInstance Opacity Option ' +
+      'Orientation Paraboloid Patch PatchMesh Perspective PixelFilter PixelSamples ' +
+      'PixelVariance Points PointsGeneralPolygons PointsPolygons Polygon Procedural Projection ' +
+      'Quantize ReadArchive RelativeDetail ReverseOrientation Rotate Scale ScreenWindow ' +
+      'ShadingInterpolation ShadingRate Shutter Sides Skew SolidBegin SolidEnd Sphere ' +
+      'SubdivisionMesh Surface TextureCoordinates Torus Transform TransformBegin TransformEnd ' +
+      'TransformPoints Translate TrimCurve WorldBegin WorldEnd',
+    illegal: '</',
+    contains: [
+      hljs.HASH_COMMENT_MODE,
+      hljs.C_NUMBER_MODE,
+      hljs.APOS_STRING_MODE,
+      hljs.QUOTE_STRING_MODE
+    ]
+  };
+};
+},{}],18:[function(require,module,exports){
+module.exports = function(hljs) {
   return {
     contains: [
       {
-        className: 'comment',
-        begin: '[^\\[\\]\\.,\\+\\-<> \r\n]',
-        excludeEnd: true,
-        end: '[\\[\\]\\.,\\+\\-<> \r\n]',
-        relevance: 0
+        className: 'chunk',
+        begin: '^\\@\\@ +\\-\\d+,\\d+ +\\+\\d+,\\d+ +\\@\\@$',
+        relevance: 10
       },
       {
-        className: 'title',
-        begin: '[\\[\\]]',
-        relevance: 0
+        className: 'chunk',
+        begin: '^\\*\\*\\* +\\d+,\\d+ +\\*\\*\\*\\*$',
+        relevance: 10
       },
       {
-        className: 'string',
-        begin: '[\\.,]'
+        className: 'chunk',
+        begin: '^\\-\\-\\- +\\d+,\\d+ +\\-\\-\\-\\-$',
+        relevance: 10
       },
       {
-        className: 'literal',
-        begin: '[\\+\\-]'
+        className: 'header',
+        begin: 'Index: ', end: '$'
+      },
+      {
+        className: 'header',
+        begin: '=====', end: '=====$'
+      },
+      {
+        className: 'header',
+        begin: '^\\-\\-\\-', end: '$'
+      },
+      {
+        className: 'header',
+        begin: '^\\*{3} ', end: '$'
+      },
+      {
+        className: 'header',
+        begin: '^\\+\\+\\+', end: '$'
+      },
+      {
+        className: 'header',
+        begin: '\\*{5}', end: '\\*{5}$'
+      },
+      {
+        className: 'addition',
+        begin: '^\\+', end: '$'
+      },
+      {
+        className: 'deletion',
+        begin: '^\\-', end: '$'
+      },
+      {
+        className: 'change',
+        begin: '^\\!', end: '$'
       }
     ]
   };
@@ -9569,196 +9710,41 @@ module.exports = function(hljs) {
     contains: RUBY_DEFAULT_CONTAINS
   };
 };
-},{}],16:[function(require,module,exports){
-module.exports = function(hljs) {
-  var TITLE = {
-    className: 'title',
-    begin: hljs.UNDERSCORE_IDENT_RE
-  };
-  var NUMBER = {
-    className: 'number',
-    begin: '\\b(0[xb][A-Za-z0-9_]+|[0-9_]+(\\.[0-9_]+)?([uif](8|16|32|64)?)?)',
-    relevance: 0
-  };
-  var KEYWORDS =
-    'alt any as assert be bind block bool break char check claim const cont dir do else enum ' +
-    'export f32 f64 fail false float fn for i16 i32 i64 i8 if iface impl import in int let ' +
-    'log mod mutable native note of prove pure resource ret self str syntax true type u16 u32 ' +
-    'u64 u8 uint unchecked unsafe use vec while';
-  return {
-    keywords: KEYWORDS,
-    illegal: '</',
-    contains: [
-      hljs.C_LINE_COMMENT_MODE,
-      hljs.C_BLOCK_COMMENT_MODE,
-      hljs.inherit(hljs.QUOTE_STRING_MODE, {illegal: null}),
-      hljs.APOS_STRING_MODE,
-      NUMBER,
-      {
-        className: 'function',
-        beginWithKeyword: true, end: '(\\(|<)',
-        keywords: 'fn',
-        contains: [TITLE]
-      },
-      {
-        className: 'preprocessor',
-        begin: '#\\[', end: '\\]'
-      },
-      {
-        beginWithKeyword: true, end: '(=|<)',
-        keywords: 'type',
-        contains: [TITLE],
-        illegal: '\\S'
-      },
-      {
-        beginWithKeyword: true, end: '({|<)',
-        keywords: 'iface enum',
-        contains: [TITLE],
-        illegal: '\\S'
-      }
-    ]
-  };
-};
-},{}],17:[function(require,module,exports){
-module.exports = function(hljs) {
-  return {
-    keywords:
-      'ArchiveRecord AreaLightSource Atmosphere Attribute AttributeBegin AttributeEnd Basis ' +
-      'Begin Blobby Bound Clipping ClippingPlane Color ColorSamples ConcatTransform Cone ' +
-      'CoordinateSystem CoordSysTransform CropWindow Curves Cylinder DepthOfField Detail ' +
-      'DetailRange Disk Displacement Display End ErrorHandler Exposure Exterior Format ' +
-      'FrameAspectRatio FrameBegin FrameEnd GeneralPolygon GeometricApproximation Geometry ' +
-      'Hider Hyperboloid Identity Illuminate Imager Interior LightSource ' +
-      'MakeCubeFaceEnvironment MakeLatLongEnvironment MakeShadow MakeTexture Matte ' +
-      'MotionBegin MotionEnd NuPatch ObjectBegin ObjectEnd ObjectInstance Opacity Option ' +
-      'Orientation Paraboloid Patch PatchMesh Perspective PixelFilter PixelSamples ' +
-      'PixelVariance Points PointsGeneralPolygons PointsPolygons Polygon Procedural Projection ' +
-      'Quantize ReadArchive RelativeDetail ReverseOrientation Rotate Scale ScreenWindow ' +
-      'ShadingInterpolation ShadingRate Shutter Sides Skew SolidBegin SolidEnd Sphere ' +
-      'SubdivisionMesh Surface TextureCoordinates Torus Transform TransformBegin TransformEnd ' +
-      'TransformPoints Translate TrimCurve WorldBegin WorldEnd',
-    illegal: '</',
-    contains: [
-      hljs.HASH_COMMENT_MODE,
-      hljs.C_NUMBER_MODE,
-      hljs.APOS_STRING_MODE,
-      hljs.QUOTE_STRING_MODE
-    ]
-  };
-};
-},{}],18:[function(require,module,exports){
-module.exports = function(hljs) {
-  return {
-    contains: [
-      {
-        className: 'chunk',
-        begin: '^\\@\\@ +\\-\\d+,\\d+ +\\+\\d+,\\d+ +\\@\\@$',
-        relevance: 10
-      },
-      {
-        className: 'chunk',
-        begin: '^\\*\\*\\* +\\d+,\\d+ +\\*\\*\\*\\*$',
-        relevance: 10
-      },
-      {
-        className: 'chunk',
-        begin: '^\\-\\-\\- +\\d+,\\d+ +\\-\\-\\-\\-$',
-        relevance: 10
-      },
-      {
-        className: 'header',
-        begin: 'Index: ', end: '$'
-      },
-      {
-        className: 'header',
-        begin: '=====', end: '=====$'
-      },
-      {
-        className: 'header',
-        begin: '^\\-\\-\\-', end: '$'
-      },
-      {
-        className: 'header',
-        begin: '^\\*{3} ', end: '$'
-      },
-      {
-        className: 'header',
-        begin: '^\\+\\+\\+', end: '$'
-      },
-      {
-        className: 'header',
-        begin: '\\*{5}', end: '\\*{5}$'
-      },
-      {
-        className: 'addition',
-        begin: '^\\+', end: '$'
-      },
-      {
-        className: 'deletion',
-        begin: '^\\-', end: '$'
-      },
-      {
-        className: 'change',
-        begin: '^\\!', end: '$'
-      }
-    ]
-  };
-};
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     keywords: {
       keyword:
-        'in if for while finally var new function do return void else break catch ' +
-        'instanceof with throw case default try this switch continue typeof delete ' +
-        'let yield const',
-      literal:
-        'true false null undefined NaN Infinity'
+        'float color point normal vector matrix while for if do return else break extern continue',
+      built_in:
+        'abs acos ambient area asin atan atmosphere attribute calculatenormal ceil cellnoise ' +
+        'clamp comp concat cos degrees depth Deriv diffuse distance Du Dv environment exp ' +
+        'faceforward filterstep floor format fresnel incident length lightsource log match ' +
+        'max min mod noise normalize ntransform opposite option phong pnoise pow printf ' +
+        'ptlined radians random reflect refract renderinfo round setcomp setxcomp setycomp ' +
+        'setzcomp shadow sign sin smoothstep specular specularbrdf spline sqrt step tan ' +
+        'texture textureinfo trace transform vtransform xcomp ycomp zcomp'
     },
+    illegal: '</',
     contains: [
-      hljs.APOS_STRING_MODE,
-      hljs.QUOTE_STRING_MODE,
       hljs.C_LINE_COMMENT_MODE,
       hljs.C_BLOCK_COMMENT_MODE,
+      hljs.QUOTE_STRING_MODE,
+      hljs.APOS_STRING_MODE,
       hljs.C_NUMBER_MODE,
-      { // "value" container
-        begin: '(' + hljs.RE_STARTERS_RE + '|\\b(case|return|throw)\\b)\\s*',
-        keywords: 'return throw case',
-        contains: [
-          hljs.C_LINE_COMMENT_MODE,
-          hljs.C_BLOCK_COMMENT_MODE,
-          {
-            className: 'regexp',
-            begin: '/', end: '/[gim]*',
-            illegal: '\\n',
-            contains: [{begin: '\\\\/'}]
-          },
-          { // E4X
-            begin: '<', end: '>;',
-            subLanguage: 'xml'
-          }
-        ],
-        relevance: 0
+      {
+        className: 'preprocessor',
+        begin: '#', end: '$'
       },
       {
-        className: 'function',
-        beginWithKeyword: true, end: '{',
-        keywords: 'function',
-        contains: [
-          {
-            className: 'title', begin: '[A-Za-z$_][0-9A-Za-z$_]*'
-          },
-          {
-            className: 'params',
-            begin: '\\(', end: '\\)',
-            contains: [
-              hljs.C_LINE_COMMENT_MODE,
-              hljs.C_BLOCK_COMMENT_MODE
-            ],
-            illegal: '["\'\\(]'
-          }
-        ],
-        illegal: '\\[|%'
+        className: 'shader',
+        beginWithKeyword: true, end: '\\(',
+        keywords: 'surface displacement light volume imager'
+      },
+      {
+        className: 'shading',
+        beginWithKeyword: true, end: '\\(',
+        keywords: 'illuminate illuminance gather'
       }
     ]
   };
@@ -9857,45 +9843,6 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],21:[function(require,module,exports){
-module.exports = function(hljs) {
-  return {
-    keywords: {
-      keyword:
-        'float color point normal vector matrix while for if do return else break extern continue',
-      built_in:
-        'abs acos ambient area asin atan atmosphere attribute calculatenormal ceil cellnoise ' +
-        'clamp comp concat cos degrees depth Deriv diffuse distance Du Dv environment exp ' +
-        'faceforward filterstep floor format fresnel incident length lightsource log match ' +
-        'max min mod noise normalize ntransform opposite option phong pnoise pow printf ' +
-        'ptlined radians random reflect refract renderinfo round setcomp setxcomp setycomp ' +
-        'setzcomp shadow sign sin smoothstep specular specularbrdf spline sqrt step tan ' +
-        'texture textureinfo trace transform vtransform xcomp ycomp zcomp'
-    },
-    illegal: '</',
-    contains: [
-      hljs.C_LINE_COMMENT_MODE,
-      hljs.C_BLOCK_COMMENT_MODE,
-      hljs.QUOTE_STRING_MODE,
-      hljs.APOS_STRING_MODE,
-      hljs.C_NUMBER_MODE,
-      {
-        className: 'preprocessor',
-        begin: '#', end: '$'
-      },
-      {
-        className: 'shader',
-        beginWithKeyword: true, end: '\\(',
-        keywords: 'surface displacement light volume imager'
-      },
-      {
-        className: 'shading',
-        beginWithKeyword: true, end: '\\(',
-        keywords: 'illuminate illuminance gather'
-      }
-    ]
-  };
-};
 },{}],22:[function(require,module,exports){
 module.exports = function(hljs) {
   var OPENING_LONG_BRACKET = '\\[=*\\[';
@@ -9955,6 +9902,143 @@ module.exports = function(hljs) {
         relevance: 10
       }
     ])
+  };
+};
+},{}],19:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    keywords: {
+      keyword:
+        'in if for while finally var new function do return void else break catch ' +
+        'instanceof with throw case default try this switch continue typeof delete ' +
+        'let yield const',
+      literal:
+        'true false null undefined NaN Infinity'
+    },
+    contains: [
+      hljs.APOS_STRING_MODE,
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_LINE_COMMENT_MODE,
+      hljs.C_BLOCK_COMMENT_MODE,
+      hljs.C_NUMBER_MODE,
+      { // "value" container
+        begin: '(' + hljs.RE_STARTERS_RE + '|\\b(case|return|throw)\\b)\\s*',
+        keywords: 'return throw case',
+        contains: [
+          hljs.C_LINE_COMMENT_MODE,
+          hljs.C_BLOCK_COMMENT_MODE,
+          {
+            className: 'regexp',
+            begin: '/', end: '/[gim]*',
+            illegal: '\\n',
+            contains: [{begin: '\\\\/'}]
+          },
+          { // E4X
+            begin: '<', end: '>;',
+            subLanguage: 'xml'
+          }
+        ],
+        relevance: 0
+      },
+      {
+        className: 'function',
+        beginWithKeyword: true, end: '{',
+        keywords: 'function',
+        contains: [
+          {
+            className: 'title', begin: '[A-Za-z$_][0-9A-Za-z$_]*'
+          },
+          {
+            className: 'params',
+            begin: '\\(', end: '\\)',
+            contains: [
+              hljs.C_LINE_COMMENT_MODE,
+              hljs.C_BLOCK_COMMENT_MODE
+            ],
+            illegal: '["\'\\(]'
+          }
+        ],
+        illegal: '\\[|%'
+      }
+    ]
+  };
+};
+},{}],24:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    contains: [
+      // highlight headers
+      {
+        className: 'header',
+        begin: '^#{1,3}', end: '$'
+      },
+      {
+        className: 'header',
+        begin: '^.+?\\n[=-]{2,}$'
+      },
+      // inline html
+      {
+        begin: '<', end: '>',
+        subLanguage: 'xml',
+        relevance: 0
+      },
+      // lists (indicators only)
+      {
+        className: 'bullet',
+        begin: '^([*+-]|(\\d+\\.))\\s+'
+      },
+      // strong segments
+      {
+        className: 'strong',
+        begin: '[*_]{2}.+?[*_]{2}'
+      },
+      // emphasis segments
+      {
+        className: 'emphasis',
+        begin: '\\*.+?\\*'
+      },
+      {
+        className: 'emphasis',
+        begin: '_.+?_',
+        relevance: 0
+      },
+      // blockquotes
+      {
+        className: 'blockquote',
+        begin: '^>\\s+', end: '$'
+      },
+      // code snippets
+      {
+        className: 'code',
+        begin: '`.+?`'
+      },
+      {
+        className: 'code',
+        begin: '^    ', end: '$',
+        relevance: 0
+      },
+      // horizontal rules
+      {
+        className: 'horizontal_rule',
+        begin: '^-{3,}', end: '$'
+      },
+      // using links - title and link
+      {
+        begin: '\\[.+?\\]\\(.+?\\)',
+        returnBegin: true,
+        contains: [
+          {
+            className: 'link_label',
+            begin: '\\[.+\\]'
+          },
+          {
+            className: 'link_url',
+            begin: '\\(', end: '\\)',
+            excludeBegin: true, excludeEnd: true
+          }
+        ]
+      }
+    ]
   };
 };
 },{}],23:[function(require,module,exports){
@@ -10059,84 +10143,6 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],24:[function(require,module,exports){
-module.exports = function(hljs) {
-  return {
-    contains: [
-      // highlight headers
-      {
-        className: 'header',
-        begin: '^#{1,3}', end: '$'
-      },
-      {
-        className: 'header',
-        begin: '^.+?\\n[=-]{2,}$'
-      },
-      // inline html
-      {
-        begin: '<', end: '>',
-        subLanguage: 'xml',
-        relevance: 0
-      },
-      // lists (indicators only)
-      {
-        className: 'bullet',
-        begin: '^([*+-]|(\\d+\\.))\\s+'
-      },
-      // strong segments
-      {
-        className: 'strong',
-        begin: '[*_]{2}.+?[*_]{2}'
-      },
-      // emphasis segments
-      {
-        className: 'emphasis',
-        begin: '\\*.+?\\*'
-      },
-      {
-        className: 'emphasis',
-        begin: '_.+?_',
-        relevance: 0
-      },
-      // blockquotes
-      {
-        className: 'blockquote',
-        begin: '^>\\s+', end: '$'
-      },
-      // code snippets
-      {
-        className: 'code',
-        begin: '`.+?`'
-      },
-      {
-        className: 'code',
-        begin: '^    ', end: '$',
-        relevance: 0
-      },
-      // horizontal rules
-      {
-        className: 'horizontal_rule',
-        begin: '^-{3,}', end: '$'
-      },
-      // using links - title and link
-      {
-        begin: '\\[.+?\\]\\(.+?\\)',
-        returnBegin: true,
-        contains: [
-          {
-            className: 'link_label',
-            begin: '\\[.+\\]'
-          },
-          {
-            className: 'link_url',
-            begin: '\\(', end: '\\)',
-            excludeBegin: true, excludeEnd: true
-          }
-        ]
-      }
-    ]
-  };
-};
 },{}],25:[function(require,module,exports){
 module.exports = function(hljs) {
   var FUNCTION = {
@@ -10230,6 +10236,84 @@ module.exports = function(hljs) {
     ]
   };
 };
+},{}],28:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    illegal: '\\S',
+    contains: [
+      {
+        className: 'status',
+        begin: '^HTTP/[0-9\\.]+', end: '$',
+        contains: [{className: 'number', begin: '\\b\\d{3}\\b'}]
+      },
+      {
+        className: 'request',
+        begin: '^[A-Z]+ (.*?) HTTP/[0-9\\.]+$', returnBegin: true, end: '$',
+        contains: [
+          {
+            className: 'string',
+            begin: ' ', end: ' ',
+            excludeBegin: true, excludeEnd: true
+          }
+        ]
+      },
+      {
+        className: 'attribute',
+        begin: '^\\w', end: ': ', excludeEnd: true,
+        illegal: '\\n|\\s|=',
+        starts: {className: 'string', end: '$'}
+      },
+      {
+        begin: '\\n\\n',
+        starts: {subLanguage: '', endsWithParent: true}
+      }
+    ]
+  };
+};
+},{}],27:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    contains: [
+      hljs.C_NUMBER_MODE,
+      {
+        className: 'builtin',
+        begin: '{', end: '}$',
+        excludeBegin: true, excludeEnd: true,
+        contains: [hljs.APOS_STRING_MODE, hljs.QUOTE_STRING_MODE],
+        relevance: 0
+      },
+      {
+        className: 'filename',
+        begin: '[a-zA-Z_][\\da-zA-Z_]+\\.[\\da-zA-Z_]{1,3}', end: ':',
+        excludeEnd: true
+      },
+      {
+        className: 'header',
+        begin: '(ncalls|tottime|cumtime)', end: '$',
+        keywords: 'ncalls tottime|10 cumtime|10 filename',
+        relevance: 10
+      },
+      {
+        className: 'summary',
+        begin: 'function calls', end: '$',
+        contains: [hljs.C_NUMBER_MODE],
+        relevance: 10
+      },
+      hljs.APOS_STRING_MODE,
+      hljs.QUOTE_STRING_MODE,
+      {
+        className: 'function',
+        begin: '\\(', end: '\\)$',
+        contains: [{
+          className: 'title',
+          begin: hljs.UNDERSCORE_IDENT_RE,
+          relevance: 0
+        }],
+        relevance: 0
+      }
+    ]
+  };
+};
 },{}],26:[function(require,module,exports){
 module.exports = function(hljs) {
   var LISP_IDENT_RE = '[a-zA-Z_\\-\\+\\*\\/\\<\\=\\>\\&\\#][a-zA-Z0-9_\\-\\+\\*\\/\\<\\=\\>\\&\\#]*';
@@ -10310,84 +10394,6 @@ module.exports = function(hljs) {
     ])
   };
 };
-},{}],27:[function(require,module,exports){
-module.exports = function(hljs) {
-  return {
-    contains: [
-      hljs.C_NUMBER_MODE,
-      {
-        className: 'builtin',
-        begin: '{', end: '}$',
-        excludeBegin: true, excludeEnd: true,
-        contains: [hljs.APOS_STRING_MODE, hljs.QUOTE_STRING_MODE],
-        relevance: 0
-      },
-      {
-        className: 'filename',
-        begin: '[a-zA-Z_][\\da-zA-Z_]+\\.[\\da-zA-Z_]{1,3}', end: ':',
-        excludeEnd: true
-      },
-      {
-        className: 'header',
-        begin: '(ncalls|tottime|cumtime)', end: '$',
-        keywords: 'ncalls tottime|10 cumtime|10 filename',
-        relevance: 10
-      },
-      {
-        className: 'summary',
-        begin: 'function calls', end: '$',
-        contains: [hljs.C_NUMBER_MODE],
-        relevance: 10
-      },
-      hljs.APOS_STRING_MODE,
-      hljs.QUOTE_STRING_MODE,
-      {
-        className: 'function',
-        begin: '\\(', end: '\\)$',
-        contains: [{
-          className: 'title',
-          begin: hljs.UNDERSCORE_IDENT_RE,
-          relevance: 0
-        }],
-        relevance: 0
-      }
-    ]
-  };
-};
-},{}],28:[function(require,module,exports){
-module.exports = function(hljs) {
-  return {
-    illegal: '\\S',
-    contains: [
-      {
-        className: 'status',
-        begin: '^HTTP/[0-9\\.]+', end: '$',
-        contains: [{className: 'number', begin: '\\b\\d{3}\\b'}]
-      },
-      {
-        className: 'request',
-        begin: '^[A-Z]+ (.*?) HTTP/[0-9\\.]+$', returnBegin: true, end: '$',
-        contains: [
-          {
-            className: 'string',
-            begin: ' ', end: ' ',
-            excludeBegin: true, excludeEnd: true
-          }
-        ]
-      },
-      {
-        className: 'attribute',
-        begin: '^\\w', end: ': ', excludeEnd: true,
-        illegal: '\\n|\\s|=',
-        starts: {className: 'string', end: '$'}
-      },
-      {
-        begin: '\\n\\n',
-        starts: {subLanguage: '', endsWithParent: true}
-      }
-    ]
-  };
-};
 },{}],29:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
@@ -10429,6 +10435,90 @@ module.exports = function(hljs) {
       hljs.C_NUMBER_MODE,
       {
         className: 'annotation', begin: '@[A-Za-z]+'
+      }
+    ]
+  };
+};
+},{}],31:[function(require,module,exports){
+module.exports = function(hljs) {
+  var TYPE = {
+    className: 'type',
+    begin: '\\b[A-Z][\\w\']*',
+    relevance: 0
+  };
+  var CONTAINER = {
+    className: 'container',
+    begin: '\\(', end: '\\)',
+    contains: [
+      {className: 'type', begin: '\\b[A-Z][\\w]*(\\((\\.\\.|,|\\w+)\\))?'},
+      {className: 'title', begin: '[_a-z][\\w\']*'}
+    ]
+  };
+  var CONTAINER2 = {
+    className: 'container',
+    begin: '{', end: '}',
+    contains: CONTAINER.contains
+  }
+
+  return {
+    keywords:
+      'let in if then else case of where do module import hiding qualified type data ' +
+      'newtype deriving class instance not as foreign ccall safe unsafe',
+    contains: [
+      {
+        className: 'comment',
+        begin: '--', end: '$'
+      },
+      {
+        className: 'preprocessor',
+        begin: '{-#', end: '#-}'
+      },
+      {
+        className: 'comment',
+        contains: ['self'],
+        begin: '{-', end: '-}'
+      },
+      {
+        className: 'string',
+        begin: '\\s+\'', end: '\'',
+        contains: [hljs.BACKSLASH_ESCAPE],
+        relevance: 0
+      },
+      hljs.QUOTE_STRING_MODE,
+      {
+        className: 'import',
+        begin: '\\bimport', end: '$',
+        keywords: 'import qualified as hiding',
+        contains: [CONTAINER],
+        illegal: '\\W\\.|;'
+      },
+      {
+        className: 'module',
+        begin: '\\bmodule', end: 'where',
+        keywords: 'module where',
+        contains: [CONTAINER],
+        illegal: '\\W\\.|;'
+      },
+      {
+        className: 'class',
+        begin: '\\b(class|instance)', end: 'where',
+        keywords: 'class where instance',
+        contains: [TYPE]
+      },
+      {
+        className: 'typedef',
+        begin: '\\b(data|(new)?type)', end: '$',
+        keywords: 'data type newtype deriving',
+        contains: [TYPE, CONTAINER, CONTAINER2]
+      },
+      hljs.C_NUMBER_MODE,
+      {
+        className: 'shebang',
+        begin: '#!\\/usr\\/bin\\/env\ runhaskell', end: '$'
+      },
+      TYPE,
+      {
+        className: 'title', begin: '^[_a-z][\\w\']*'
       }
     ]
   };
@@ -10536,90 +10626,6 @@ module.exports = function(hljs) {
   };
 };
 })()
-},{}],31:[function(require,module,exports){
-module.exports = function(hljs) {
-  var TYPE = {
-    className: 'type',
-    begin: '\\b[A-Z][\\w\']*',
-    relevance: 0
-  };
-  var CONTAINER = {
-    className: 'container',
-    begin: '\\(', end: '\\)',
-    contains: [
-      {className: 'type', begin: '\\b[A-Z][\\w]*(\\((\\.\\.|,|\\w+)\\))?'},
-      {className: 'title', begin: '[_a-z][\\w\']*'}
-    ]
-  };
-  var CONTAINER2 = {
-    className: 'container',
-    begin: '{', end: '}',
-    contains: CONTAINER.contains
-  }
-
-  return {
-    keywords:
-      'let in if then else case of where do module import hiding qualified type data ' +
-      'newtype deriving class instance not as foreign ccall safe unsafe',
-    contains: [
-      {
-        className: 'comment',
-        begin: '--', end: '$'
-      },
-      {
-        className: 'preprocessor',
-        begin: '{-#', end: '#-}'
-      },
-      {
-        className: 'comment',
-        contains: ['self'],
-        begin: '{-', end: '-}'
-      },
-      {
-        className: 'string',
-        begin: '\\s+\'', end: '\'',
-        contains: [hljs.BACKSLASH_ESCAPE],
-        relevance: 0
-      },
-      hljs.QUOTE_STRING_MODE,
-      {
-        className: 'import',
-        begin: '\\bimport', end: '$',
-        keywords: 'import qualified as hiding',
-        contains: [CONTAINER],
-        illegal: '\\W\\.|;'
-      },
-      {
-        className: 'module',
-        begin: '\\bmodule', end: 'where',
-        keywords: 'module where',
-        contains: [CONTAINER],
-        illegal: '\\W\\.|;'
-      },
-      {
-        className: 'class',
-        begin: '\\b(class|instance)', end: 'where',
-        keywords: 'class where instance',
-        contains: [TYPE]
-      },
-      {
-        className: 'typedef',
-        begin: '\\b(data|(new)?type)', end: '$',
-        keywords: 'data type newtype deriving',
-        contains: [TYPE, CONTAINER, CONTAINER2]
-      },
-      hljs.C_NUMBER_MODE,
-      {
-        className: 'shebang',
-        begin: '#!\\/usr\\/bin\\/env\ runhaskell', end: '$'
-      },
-      TYPE,
-      {
-        className: 'title', begin: '^[_a-z][\\w\']*'
-      }
-    ]
-  };
-};
 },{}],32:[function(require,module,exports){
 module.exports = function(hljs){
   var IDENT_RE_RU = '[a-zA-Zа-яА-Я][a-zA-Z0-9_а-яА-Я]*';
@@ -10704,6 +10710,134 @@ module.exports = function(hljs){
       },
       {className: 'preprocessor', begin: '#', end: '$'},
       {className: 'date', begin: '\'\\d{2}\\.\\d{2}\\.(\\d{2}|\\d{4})\''}
+    ]
+  };
+};
+},{}],34:[function(require,module,exports){
+module.exports = function(hljs) {
+  var VAR_IDENT_RE = '[a-z][a-zA-Z0-9_]*';
+  var CHAR = {
+    className: 'char',
+    begin: '\\$.{1}'
+  };
+  var SYMBOL = {
+    className: 'symbol',
+    begin: '#' + hljs.UNDERSCORE_IDENT_RE
+  };
+  return {
+    keywords: 'self super nil true false thisContext', // only 6
+    contains: [
+      {
+        className: 'comment',
+        begin: '"', end: '"',
+        relevance: 0
+      },
+      hljs.APOS_STRING_MODE,
+      {
+        className: 'class',
+        begin: '\\b[A-Z][A-Za-z0-9_]*',
+        relevance: 0
+      },
+      {
+        className: 'method',
+        begin: VAR_IDENT_RE + ':'
+      },
+      hljs.C_NUMBER_MODE,
+      SYMBOL,
+      CHAR,
+      {
+        className: 'localvars',
+        begin: '\\|\\s*((' + VAR_IDENT_RE + ')\\s*)+\\|'
+      },
+      {
+        className: 'array',
+        begin: '\\#\\(', end: '\\)',
+        contains: [
+          hljs.APOS_STRING_MODE,
+          CHAR,
+          hljs.C_NUMBER_MODE,
+          SYMBOL
+        ]
+      }
+    ]
+  };
+};
+},{}],36:[function(require,module,exports){
+module.exports = function(hljs) {
+  var IDENT_RE = '[a-zA-Z_$][a-zA-Z0-9_$]*';
+  var IDENT_FUNC_RETURN_TYPE_RE = '([*]|[a-zA-Z_$][a-zA-Z0-9_$]*)';
+
+  var AS3_REST_ARG_MODE = {
+    className: 'rest_arg',
+    begin: '[.]{3}', end: IDENT_RE,
+    relevance: 10
+  };
+  var TITLE_MODE = {className: 'title', begin: IDENT_RE};
+
+  return {
+    keywords: {
+      keyword: 'as break case catch class const continue default delete do dynamic each ' +
+        'else extends final finally for function get if implements import in include ' +
+        'instanceof interface internal is namespace native new override package private ' +
+        'protected public return set static super switch this throw try typeof use var void ' +
+        'while with',
+      literal: 'true false null undefined'
+    },
+    contains: [
+      hljs.APOS_STRING_MODE,
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_LINE_COMMENT_MODE,
+      hljs.C_BLOCK_COMMENT_MODE,
+      hljs.C_NUMBER_MODE,
+      {
+        className: 'package',
+        beginWithKeyword: true, end: '{',
+        keywords: 'package',
+        contains: [TITLE_MODE]
+      },
+      {
+        className: 'class',
+        beginWithKeyword: true, end: '{',
+        keywords: 'class interface',
+        contains: [
+          {
+            beginWithKeyword: true,
+            keywords: 'extends implements'
+          },
+          TITLE_MODE
+        ]
+      },
+      {
+        className: 'preprocessor',
+        beginWithKeyword: true, end: ';',
+        keywords: 'import include'
+      },
+      {
+        className: 'function',
+        beginWithKeyword: true, end: '[{;]',
+        keywords: 'function',
+        illegal: '\\S',
+        contains: [
+          TITLE_MODE,
+          {
+            className: 'params',
+            begin: '\\(', end: '\\)',
+            contains: [
+              hljs.APOS_STRING_MODE,
+              hljs.QUOTE_STRING_MODE,
+              hljs.C_LINE_COMMENT_MODE,
+              hljs.C_BLOCK_COMMENT_MODE,
+              AS3_REST_ARG_MODE
+            ]
+          },
+          {
+            className: 'type',
+            begin: ':',
+            end: IDENT_FUNC_RETURN_TYPE_RE,
+            relevance: 10
+          }
+        ]
+      }
     ]
   };
 };
@@ -10793,187 +10927,6 @@ module.exports = function(hljs){
   };
 };
 })()
-},{}],34:[function(require,module,exports){
-module.exports = function(hljs) {
-  var VAR_IDENT_RE = '[a-z][a-zA-Z0-9_]*';
-  var CHAR = {
-    className: 'char',
-    begin: '\\$.{1}'
-  };
-  var SYMBOL = {
-    className: 'symbol',
-    begin: '#' + hljs.UNDERSCORE_IDENT_RE
-  };
-  return {
-    keywords: 'self super nil true false thisContext', // only 6
-    contains: [
-      {
-        className: 'comment',
-        begin: '"', end: '"',
-        relevance: 0
-      },
-      hljs.APOS_STRING_MODE,
-      {
-        className: 'class',
-        begin: '\\b[A-Z][A-Za-z0-9_]*',
-        relevance: 0
-      },
-      {
-        className: 'method',
-        begin: VAR_IDENT_RE + ':'
-      },
-      hljs.C_NUMBER_MODE,
-      SYMBOL,
-      CHAR,
-      {
-        className: 'localvars',
-        begin: '\\|\\s*((' + VAR_IDENT_RE + ')\\s*)+\\|'
-      },
-      {
-        className: 'array',
-        begin: '\\#\\(', end: '\\)',
-        contains: [
-          hljs.APOS_STRING_MODE,
-          CHAR,
-          hljs.C_NUMBER_MODE,
-          SYMBOL
-        ]
-      }
-    ]
-  };
-};
-},{}],35:[function(require,module,exports){
-module.exports = function(hljs) {
-  var COMMAND1 = {
-    className: 'command',
-    begin: '\\\\[a-zA-Zа-яА-я]+[\\*]?'
-  };
-  var COMMAND2 = {
-    className: 'command',
-    begin: '\\\\[^a-zA-Zа-яА-я0-9]'
-  };
-  var SPECIAL = {
-    className: 'special',
-    begin: '[{}\\[\\]\\&#~]',
-    relevance: 0
-  };
-
-  return {
-    contains: [
-      { // parameter
-        begin: '\\\\[a-zA-Zа-яА-я]+[\\*]? *= *-?\\d*\\.?\\d+(pt|pc|mm|cm|in|dd|cc|ex|em)?',
-        returnBegin: true,
-        contains: [
-          COMMAND1, COMMAND2,
-          {
-            className: 'number',
-            begin: ' *=', end: '-?\\d*\\.?\\d+(pt|pc|mm|cm|in|dd|cc|ex|em)?',
-            excludeBegin: true
-          }
-        ],
-        relevance: 10
-      },
-      COMMAND1, COMMAND2,
-      SPECIAL,
-      {
-        className: 'formula',
-        begin: '\\$\\$', end: '\\$\\$',
-        contains: [COMMAND1, COMMAND2, SPECIAL],
-        relevance: 0
-      },
-      {
-        className: 'formula',
-        begin: '\\$', end: '\\$',
-        contains: [COMMAND1, COMMAND2, SPECIAL],
-        relevance: 0
-      },
-      {
-        className: 'comment',
-        begin: '%', end: '$',
-        relevance: 0
-      }
-    ]
-  };
-};
-},{}],36:[function(require,module,exports){
-module.exports = function(hljs) {
-  var IDENT_RE = '[a-zA-Z_$][a-zA-Z0-9_$]*';
-  var IDENT_FUNC_RETURN_TYPE_RE = '([*]|[a-zA-Z_$][a-zA-Z0-9_$]*)';
-
-  var AS3_REST_ARG_MODE = {
-    className: 'rest_arg',
-    begin: '[.]{3}', end: IDENT_RE,
-    relevance: 10
-  };
-  var TITLE_MODE = {className: 'title', begin: IDENT_RE};
-
-  return {
-    keywords: {
-      keyword: 'as break case catch class const continue default delete do dynamic each ' +
-        'else extends final finally for function get if implements import in include ' +
-        'instanceof interface internal is namespace native new override package private ' +
-        'protected public return set static super switch this throw try typeof use var void ' +
-        'while with',
-      literal: 'true false null undefined'
-    },
-    contains: [
-      hljs.APOS_STRING_MODE,
-      hljs.QUOTE_STRING_MODE,
-      hljs.C_LINE_COMMENT_MODE,
-      hljs.C_BLOCK_COMMENT_MODE,
-      hljs.C_NUMBER_MODE,
-      {
-        className: 'package',
-        beginWithKeyword: true, end: '{',
-        keywords: 'package',
-        contains: [TITLE_MODE]
-      },
-      {
-        className: 'class',
-        beginWithKeyword: true, end: '{',
-        keywords: 'class interface',
-        contains: [
-          {
-            beginWithKeyword: true,
-            keywords: 'extends implements'
-          },
-          TITLE_MODE
-        ]
-      },
-      {
-        className: 'preprocessor',
-        beginWithKeyword: true, end: ';',
-        keywords: 'import include'
-      },
-      {
-        className: 'function',
-        beginWithKeyword: true, end: '[{;]',
-        keywords: 'function',
-        illegal: '\\S',
-        contains: [
-          TITLE_MODE,
-          {
-            className: 'params',
-            begin: '\\(', end: '\\)',
-            contains: [
-              hljs.APOS_STRING_MODE,
-              hljs.QUOTE_STRING_MODE,
-              hljs.C_LINE_COMMENT_MODE,
-              hljs.C_BLOCK_COMMENT_MODE,
-              AS3_REST_ARG_MODE
-            ]
-          },
-          {
-            className: 'type',
-            begin: ':',
-            end: IDENT_FUNC_RETURN_TYPE_RE,
-            relevance: 10
-          }
-        ]
-      }
-    ]
-  };
-};
 },{}],37:[function(require,module,exports){
 (function(){module.exports = function(hljs) {
   return {
@@ -11036,6 +10989,293 @@ module.exports = function(hljs) {
   };
 };
 })()
+},{}],35:[function(require,module,exports){
+module.exports = function(hljs) {
+  var COMMAND1 = {
+    className: 'command',
+    begin: '\\\\[a-zA-Zа-яА-я]+[\\*]?'
+  };
+  var COMMAND2 = {
+    className: 'command',
+    begin: '\\\\[^a-zA-Zа-яА-я0-9]'
+  };
+  var SPECIAL = {
+    className: 'special',
+    begin: '[{}\\[\\]\\&#~]',
+    relevance: 0
+  };
+
+  return {
+    contains: [
+      { // parameter
+        begin: '\\\\[a-zA-Zа-яА-я]+[\\*]? *= *-?\\d*\\.?\\d+(pt|pc|mm|cm|in|dd|cc|ex|em)?',
+        returnBegin: true,
+        contains: [
+          COMMAND1, COMMAND2,
+          {
+            className: 'number',
+            begin: ' *=', end: '-?\\d*\\.?\\d+(pt|pc|mm|cm|in|dd|cc|ex|em)?',
+            excludeBegin: true
+          }
+        ],
+        relevance: 10
+      },
+      COMMAND1, COMMAND2,
+      SPECIAL,
+      {
+        className: 'formula',
+        begin: '\\$\\$', end: '\\$\\$',
+        contains: [COMMAND1, COMMAND2, SPECIAL],
+        relevance: 0
+      },
+      {
+        className: 'formula',
+        begin: '\\$', end: '\\$',
+        contains: [COMMAND1, COMMAND2, SPECIAL],
+        relevance: 0
+      },
+      {
+        className: 'comment',
+        begin: '%', end: '$',
+        relevance: 0
+      }
+    ]
+  };
+};
+},{}],41:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    keywords: 'false int abstract private char interface boolean static null if for true ' +
+      'while long throw finally protected extends final implements return void enum else ' +
+      'break new catch byte super class case short default double public try this switch ' +
+      'continue reverse firstfast firstonly forupdate nofetch sum avg minof maxof count ' +
+      'order group by asc desc index hint like dispaly edit client server ttsbegin ' +
+      'ttscommit str real date container anytype common div mod',
+    contains: [
+      hljs.C_LINE_COMMENT_MODE,
+      hljs.C_BLOCK_COMMENT_MODE,
+      hljs.APOS_STRING_MODE,
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_NUMBER_MODE,
+      {
+        className: 'preprocessor',
+        begin: '#', end: '$'
+      },
+      {
+        className: 'class',
+        beginWithKeyword: true, end: '{',
+        illegal: ':',
+        keywords: 'class interface',
+        contains: [
+          {
+            className: 'inheritance',
+            beginWithKeyword: true,
+            keywords: 'extends implements',
+            relevance: 10
+          },
+          {
+            className: 'title',
+            begin: hljs.UNDERSCORE_IDENT_RE
+          }
+        ]
+      }
+    ]
+  };
+};
+},{}],39:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    case_insensitive: true,
+    illegal: '[^\\s]',
+    contains: [
+      {
+        className: 'comment',
+        begin: ';', end: '$'
+      },
+      {
+        className: 'title',
+        begin: '^\\[', end: '\\]'
+      },
+      {
+        className: 'setting',
+        begin: '^[a-z0-9\\[\\]_-]+[ \\t]*=[ \\t]*', end: '$',
+        contains: [
+          {
+            className: 'value',
+            endsWithParent: true,
+            keywords: 'on off true false yes no',
+            contains: [hljs.QUOTE_STRING_MODE, hljs.NUMBER_MODE]
+          }
+        ]
+      }
+    ]
+  };
+};
+},{}],42:[function(require,module,exports){
+module.exports = function(hljs) {
+  var PERL_KEYWORDS = 'getpwent getservent quotemeta msgrcv scalar kill dbmclose undef lc ' +
+    'ma syswrite tr send umask sysopen shmwrite vec qx utime local oct semctl localtime ' +
+    'readpipe do return format read sprintf dbmopen pop getpgrp not getpwnam rewinddir qq' +
+    'fileno qw endprotoent wait sethostent bless s|0 opendir continue each sleep endgrent ' +
+    'shutdown dump chomp connect getsockname die socketpair close flock exists index shmget' +
+    'sub for endpwent redo lstat msgctl setpgrp abs exit select print ref gethostbyaddr ' +
+    'unshift fcntl syscall goto getnetbyaddr join gmtime symlink semget splice x|0 ' +
+    'getpeername recv log setsockopt cos last reverse gethostbyname getgrnam study formline ' +
+    'endhostent times chop length gethostent getnetent pack getprotoent getservbyname rand ' +
+    'mkdir pos chmod y|0 substr endnetent printf next open msgsnd readdir use unlink ' +
+    'getsockopt getpriority rindex wantarray hex system getservbyport endservent int chr ' +
+    'untie rmdir prototype tell listen fork shmread ucfirst setprotoent else sysseek link ' +
+    'getgrgid shmctl waitpid unpack getnetbyname reset chdir grep split require caller ' +
+    'lcfirst until warn while values shift telldir getpwuid my getprotobynumber delete and ' +
+    'sort uc defined srand accept package seekdir getprotobyname semop our rename seek if q|0 ' +
+    'chroot sysread setpwent no crypt getc chown sqrt write setnetent setpriority foreach ' +
+    'tie sin msgget map stat getlogin unless elsif truncate exec keys glob tied closedir' +
+    'ioctl socket readlink eval xor readline binmode setservent eof ord bind alarm pipe ' +
+    'atan2 getgrent exp time push setgrent gt lt or ne m|0 break given say state when';
+  var SUBST = {
+    className: 'subst',
+    begin: '[$@]\\{', end: '\\}',
+    keywords: PERL_KEYWORDS,
+    relevance: 10
+  };
+  var VAR1 = {
+    className: 'variable',
+    begin: '\\$\\d'
+  };
+  var VAR2 = {
+    className: 'variable',
+    begin: '[\\$\\%\\@\\*](\\^\\w\\b|#\\w+(\\:\\:\\w+)*|[^\\s\\w{]|{\\w+}|\\w+(\\:\\:\\w*)*)'
+  };
+  var STRING_CONTAINS = [hljs.BACKSLASH_ESCAPE, SUBST, VAR1, VAR2];
+  var METHOD = {
+    begin: '->',
+    contains: [
+      {begin: hljs.IDENT_RE},
+      {begin: '{', end: '}'}
+    ]
+  };
+  var COMMENT = {
+    className: 'comment',
+    begin: '^(__END__|__DATA__)', end: '\\n$',
+    relevance: 5
+  }
+  var PERL_DEFAULT_CONTAINS = [
+    VAR1, VAR2,
+    hljs.HASH_COMMENT_MODE,
+    COMMENT,
+    {
+      className: 'comment',
+      begin: '^\\=\\w', end: '\\=cut', endsWithParent: true
+    },
+    METHOD,
+    {
+      className: 'string',
+      begin: 'q[qwxr]?\\s*\\(', end: '\\)',
+      contains: STRING_CONTAINS,
+      relevance: 5
+    },
+    {
+      className: 'string',
+      begin: 'q[qwxr]?\\s*\\[', end: '\\]',
+      contains: STRING_CONTAINS,
+      relevance: 5
+    },
+    {
+      className: 'string',
+      begin: 'q[qwxr]?\\s*\\{', end: '\\}',
+      contains: STRING_CONTAINS,
+      relevance: 5
+    },
+    {
+      className: 'string',
+      begin: 'q[qwxr]?\\s*\\|', end: '\\|',
+      contains: STRING_CONTAINS,
+      relevance: 5
+    },
+    {
+      className: 'string',
+      begin: 'q[qwxr]?\\s*\\<', end: '\\>',
+      contains: STRING_CONTAINS,
+      relevance: 5
+    },
+    {
+      className: 'string',
+      begin: 'qw\\s+q', end: 'q',
+      contains: STRING_CONTAINS,
+      relevance: 5
+    },
+    {
+      className: 'string',
+      begin: '\'', end: '\'',
+      contains: [hljs.BACKSLASH_ESCAPE],
+      relevance: 0
+    },
+    {
+      className: 'string',
+      begin: '"', end: '"',
+      contains: STRING_CONTAINS,
+      relevance: 0
+    },
+    {
+      className: 'string',
+      begin: '`', end: '`',
+      contains: [hljs.BACKSLASH_ESCAPE]
+    },
+    {
+      className: 'string',
+      begin: '{\\w+}',
+      relevance: 0
+    },
+    {
+      className: 'string',
+      begin: '\-?\\w+\\s*\\=\\>',
+      relevance: 0
+    },
+    {
+      className: 'number',
+      begin: '(\\b0[0-7_]+)|(\\b0x[0-9a-fA-F_]+)|(\\b[1-9][0-9_]*(\\.[0-9_]+)?)|[0_]\\b',
+      relevance: 0
+    },
+    { // regexp container
+      begin: '(' + hljs.RE_STARTERS_RE + '|\\b(split|return|print|reverse|grep)\\b)\\s*',
+      keywords: 'split return print reverse grep',
+      relevance: 0,
+      contains: [
+        hljs.HASH_COMMENT_MODE,
+        COMMENT,
+        {
+          className: 'regexp',
+          begin: '(s|tr|y)/(\\\\.|[^/])*/(\\\\.|[^/])*/[a-z]*',
+          relevance: 10
+        },
+        {
+          className: 'regexp',
+          begin: '(m|qr)?/', end: '/[a-z]*',
+          contains: [hljs.BACKSLASH_ESCAPE],
+          relevance: 0 // allows empty "//" which is a common comment delimiter in other languages
+        }
+      ]
+    },
+    {
+      className: 'sub',
+      beginWithKeyword: true, end: '(\\s*\\(.*?\\))?[;{]',
+      keywords: 'sub',
+      relevance: 5
+    },
+    {
+      className: 'operator',
+      begin: '-\\w\\b',
+      relevance: 0
+    }
+  ];
+  SUBST.contains = PERL_DEFAULT_CONTAINS;
+  METHOD.contains[1].contains = PERL_DEFAULT_CONTAINS;
+
+  return {
+    keywords: PERL_KEYWORDS,
+    contains: PERL_DEFAULT_CONTAINS
+  };
+};
 },{}],38:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
@@ -11098,32 +11338,143 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],39:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports = function(hljs) {
+  var OBJC_KEYWORDS = {
+    keyword:
+      'int float while private char catch export sizeof typedef const struct for union ' +
+      'unsigned long volatile static protected bool mutable if public do return goto void ' +
+      'enum else break extern class asm case short default double throw register explicit ' +
+      'signed typename try this switch continue wchar_t inline readonly assign property ' +
+      'protocol self synchronized end synthesize id optional required implementation ' +
+      'nonatomic interface super unichar finally dynamic IBOutlet IBAction selector strong ' +
+      'weak readonly',
+    literal:
+    	'false true FALSE TRUE nil YES NO NULL',
+    built_in:
+      'NSString NSDictionary CGRect CGPoint UIButton UILabel UITextView UIWebView MKMapView ' +
+      'UISegmentedControl NSObject UITableViewDelegate UITableViewDataSource NSThread ' +
+      'UIActivityIndicator UITabbar UIToolBar UIBarButtonItem UIImageView NSAutoreleasePool ' +
+      'UITableView BOOL NSInteger CGFloat NSException NSLog NSMutableString NSMutableArray ' +
+      'NSMutableDictionary NSURL NSIndexPath CGSize UITableViewCell UIView UIViewController ' +
+      'UINavigationBar UINavigationController UITabBarController UIPopoverController ' +
+      'UIPopoverControllerDelegate UIImage NSNumber UISearchBar NSFetchedResultsController ' +
+      'NSFetchedResultsChangeType UIScrollView UIScrollViewDelegate UIEdgeInsets UIColor ' +
+      'UIFont UIApplication NSNotFound NSNotificationCenter NSNotification ' +
+      'UILocalNotification NSBundle NSFileManager NSTimeInterval NSDate NSCalendar ' +
+      'NSUserDefaults UIWindow NSRange NSArray NSError NSURLRequest NSURLConnection class ' +
+      'UIInterfaceOrientation MPMoviePlayerController dispatch_once_t ' +
+      'dispatch_queue_t dispatch_sync dispatch_async dispatch_once'
+  };
   return {
-    case_insensitive: true,
-    illegal: '[^\\s]',
+    keywords: OBJC_KEYWORDS,
+    illegal: '</',
+    contains: [
+      hljs.C_LINE_COMMENT_MODE,
+      hljs.C_BLOCK_COMMENT_MODE,
+      hljs.C_NUMBER_MODE,
+      hljs.QUOTE_STRING_MODE,
+      {
+        className: 'string',
+        begin: '\'',
+        end: '[^\\\\]\'',
+        illegal: '[^\\\\][^\']'
+      },
+
+      {
+        className: 'preprocessor',
+        begin: '#import',
+        end: '$',
+        contains: [
+        {
+          className: 'title',
+          begin: '\"',
+          end: '\"'
+        },
+        {
+          className: 'title',
+          begin: '<',
+          end: '>'
+        }
+        ]
+      },
+      {
+        className: 'preprocessor',
+        begin: '#',
+        end: '$'
+      },
+      {
+        className: 'class',
+        beginWithKeyword: true,
+        end: '({|$)',
+        keywords: 'interface class protocol implementation',
+        contains: [{
+          className: 'id',
+          begin: hljs.UNDERSCORE_IDENT_RE
+        }
+        ]
+      },
+      {
+        className: 'variable',
+        begin: '\\.'+hljs.UNDERSCORE_IDENT_RE
+      }
+    ]
+  };
+};
+},{}],43:[function(require,module,exports){
+module.exports = function(hljs) {
+  var ANNOTATION = {
+    className: 'annotation', begin: '@[A-Za-z]+'
+  };
+  var STRING = {
+    className: 'string',
+    begin: 'u?r?"""', end: '"""',
+    relevance: 10
+  };
+  return {
+    keywords:
+      'type yield lazy override def with val var false true sealed abstract private trait ' +
+      'object null if for while throw finally protected extends import final return else ' +
+      'break new catch super class case package default try this match continue throws',
     contains: [
       {
-        className: 'comment',
-        begin: ';', end: '$'
+        className: 'javadoc',
+        begin: '/\\*\\*', end: '\\*/',
+        contains: [{
+          className: 'javadoctag',
+          begin: '@[A-Za-z]+'
+        }],
+        relevance: 10
       },
+      hljs.C_LINE_COMMENT_MODE, hljs.C_BLOCK_COMMENT_MODE,
+      hljs.APOS_STRING_MODE, hljs.QUOTE_STRING_MODE, STRING,
       {
-        className: 'title',
-        begin: '^\\[', end: '\\]'
-      },
-      {
-        className: 'setting',
-        begin: '^[a-z0-9\\[\\]_-]+[ \\t]*=[ \\t]*', end: '$',
+        className: 'class',
+        begin: '((case )?class |object |trait )', end: '({|$)', // beginWithKeyword won't work because a single "case" shouldn't start this mode
+        illegal: ':',
+        keywords: 'case class trait object',
         contains: [
           {
-            className: 'value',
-            endsWithParent: true,
-            keywords: 'on off true false yes no',
-            contains: [hljs.QUOTE_STRING_MODE, hljs.NUMBER_MODE]
+            beginWithKeyword: true,
+            keywords: 'extends with',
+            relevance: 10
+          },
+          {
+            className: 'title',
+            begin: hljs.UNDERSCORE_IDENT_RE
+          },
+          {
+            className: 'params',
+            begin: '\\(', end: '\\)',
+            contains: [
+              hljs.APOS_STRING_MODE, hljs.QUOTE_STRING_MODE, STRING,
+              ANNOTATION
+            ]
           }
         ]
-      }
+      },
+      hljs.C_NUMBER_MODE,
+      ANNOTATION
     ]
   };
 };
@@ -11387,268 +11738,6 @@ function(hljs) {
 		]
 	};
 };
-},{}],41:[function(require,module,exports){
-module.exports = function(hljs) {
-  return {
-    keywords: 'false int abstract private char interface boolean static null if for true ' +
-      'while long throw finally protected extends final implements return void enum else ' +
-      'break new catch byte super class case short default double public try this switch ' +
-      'continue reverse firstfast firstonly forupdate nofetch sum avg minof maxof count ' +
-      'order group by asc desc index hint like dispaly edit client server ttsbegin ' +
-      'ttscommit str real date container anytype common div mod',
-    contains: [
-      hljs.C_LINE_COMMENT_MODE,
-      hljs.C_BLOCK_COMMENT_MODE,
-      hljs.APOS_STRING_MODE,
-      hljs.QUOTE_STRING_MODE,
-      hljs.C_NUMBER_MODE,
-      {
-        className: 'preprocessor',
-        begin: '#', end: '$'
-      },
-      {
-        className: 'class',
-        beginWithKeyword: true, end: '{',
-        illegal: ':',
-        keywords: 'class interface',
-        contains: [
-          {
-            className: 'inheritance',
-            beginWithKeyword: true,
-            keywords: 'extends implements',
-            relevance: 10
-          },
-          {
-            className: 'title',
-            begin: hljs.UNDERSCORE_IDENT_RE
-          }
-        ]
-      }
-    ]
-  };
-};
-},{}],42:[function(require,module,exports){
-module.exports = function(hljs) {
-  var PERL_KEYWORDS = 'getpwent getservent quotemeta msgrcv scalar kill dbmclose undef lc ' +
-    'ma syswrite tr send umask sysopen shmwrite vec qx utime local oct semctl localtime ' +
-    'readpipe do return format read sprintf dbmopen pop getpgrp not getpwnam rewinddir qq' +
-    'fileno qw endprotoent wait sethostent bless s|0 opendir continue each sleep endgrent ' +
-    'shutdown dump chomp connect getsockname die socketpair close flock exists index shmget' +
-    'sub for endpwent redo lstat msgctl setpgrp abs exit select print ref gethostbyaddr ' +
-    'unshift fcntl syscall goto getnetbyaddr join gmtime symlink semget splice x|0 ' +
-    'getpeername recv log setsockopt cos last reverse gethostbyname getgrnam study formline ' +
-    'endhostent times chop length gethostent getnetent pack getprotoent getservbyname rand ' +
-    'mkdir pos chmod y|0 substr endnetent printf next open msgsnd readdir use unlink ' +
-    'getsockopt getpriority rindex wantarray hex system getservbyport endservent int chr ' +
-    'untie rmdir prototype tell listen fork shmread ucfirst setprotoent else sysseek link ' +
-    'getgrgid shmctl waitpid unpack getnetbyname reset chdir grep split require caller ' +
-    'lcfirst until warn while values shift telldir getpwuid my getprotobynumber delete and ' +
-    'sort uc defined srand accept package seekdir getprotobyname semop our rename seek if q|0 ' +
-    'chroot sysread setpwent no crypt getc chown sqrt write setnetent setpriority foreach ' +
-    'tie sin msgget map stat getlogin unless elsif truncate exec keys glob tied closedir' +
-    'ioctl socket readlink eval xor readline binmode setservent eof ord bind alarm pipe ' +
-    'atan2 getgrent exp time push setgrent gt lt or ne m|0 break given say state when';
-  var SUBST = {
-    className: 'subst',
-    begin: '[$@]\\{', end: '\\}',
-    keywords: PERL_KEYWORDS,
-    relevance: 10
-  };
-  var VAR1 = {
-    className: 'variable',
-    begin: '\\$\\d'
-  };
-  var VAR2 = {
-    className: 'variable',
-    begin: '[\\$\\%\\@\\*](\\^\\w\\b|#\\w+(\\:\\:\\w+)*|[^\\s\\w{]|{\\w+}|\\w+(\\:\\:\\w*)*)'
-  };
-  var STRING_CONTAINS = [hljs.BACKSLASH_ESCAPE, SUBST, VAR1, VAR2];
-  var METHOD = {
-    begin: '->',
-    contains: [
-      {begin: hljs.IDENT_RE},
-      {begin: '{', end: '}'}
-    ]
-  };
-  var COMMENT = {
-    className: 'comment',
-    begin: '^(__END__|__DATA__)', end: '\\n$',
-    relevance: 5
-  }
-  var PERL_DEFAULT_CONTAINS = [
-    VAR1, VAR2,
-    hljs.HASH_COMMENT_MODE,
-    COMMENT,
-    {
-      className: 'comment',
-      begin: '^\\=\\w', end: '\\=cut', endsWithParent: true
-    },
-    METHOD,
-    {
-      className: 'string',
-      begin: 'q[qwxr]?\\s*\\(', end: '\\)',
-      contains: STRING_CONTAINS,
-      relevance: 5
-    },
-    {
-      className: 'string',
-      begin: 'q[qwxr]?\\s*\\[', end: '\\]',
-      contains: STRING_CONTAINS,
-      relevance: 5
-    },
-    {
-      className: 'string',
-      begin: 'q[qwxr]?\\s*\\{', end: '\\}',
-      contains: STRING_CONTAINS,
-      relevance: 5
-    },
-    {
-      className: 'string',
-      begin: 'q[qwxr]?\\s*\\|', end: '\\|',
-      contains: STRING_CONTAINS,
-      relevance: 5
-    },
-    {
-      className: 'string',
-      begin: 'q[qwxr]?\\s*\\<', end: '\\>',
-      contains: STRING_CONTAINS,
-      relevance: 5
-    },
-    {
-      className: 'string',
-      begin: 'qw\\s+q', end: 'q',
-      contains: STRING_CONTAINS,
-      relevance: 5
-    },
-    {
-      className: 'string',
-      begin: '\'', end: '\'',
-      contains: [hljs.BACKSLASH_ESCAPE],
-      relevance: 0
-    },
-    {
-      className: 'string',
-      begin: '"', end: '"',
-      contains: STRING_CONTAINS,
-      relevance: 0
-    },
-    {
-      className: 'string',
-      begin: '`', end: '`',
-      contains: [hljs.BACKSLASH_ESCAPE]
-    },
-    {
-      className: 'string',
-      begin: '{\\w+}',
-      relevance: 0
-    },
-    {
-      className: 'string',
-      begin: '\-?\\w+\\s*\\=\\>',
-      relevance: 0
-    },
-    {
-      className: 'number',
-      begin: '(\\b0[0-7_]+)|(\\b0x[0-9a-fA-F_]+)|(\\b[1-9][0-9_]*(\\.[0-9_]+)?)|[0_]\\b',
-      relevance: 0
-    },
-    { // regexp container
-      begin: '(' + hljs.RE_STARTERS_RE + '|\\b(split|return|print|reverse|grep)\\b)\\s*',
-      keywords: 'split return print reverse grep',
-      relevance: 0,
-      contains: [
-        hljs.HASH_COMMENT_MODE,
-        COMMENT,
-        {
-          className: 'regexp',
-          begin: '(s|tr|y)/(\\\\.|[^/])*/(\\\\.|[^/])*/[a-z]*',
-          relevance: 10
-        },
-        {
-          className: 'regexp',
-          begin: '(m|qr)?/', end: '/[a-z]*',
-          contains: [hljs.BACKSLASH_ESCAPE],
-          relevance: 0 // allows empty "//" which is a common comment delimiter in other languages
-        }
-      ]
-    },
-    {
-      className: 'sub',
-      beginWithKeyword: true, end: '(\\s*\\(.*?\\))?[;{]',
-      keywords: 'sub',
-      relevance: 5
-    },
-    {
-      className: 'operator',
-      begin: '-\\w\\b',
-      relevance: 0
-    }
-  ];
-  SUBST.contains = PERL_DEFAULT_CONTAINS;
-  METHOD.contains[1].contains = PERL_DEFAULT_CONTAINS;
-
-  return {
-    keywords: PERL_KEYWORDS,
-    contains: PERL_DEFAULT_CONTAINS
-  };
-};
-},{}],43:[function(require,module,exports){
-module.exports = function(hljs) {
-  var ANNOTATION = {
-    className: 'annotation', begin: '@[A-Za-z]+'
-  };
-  var STRING = {
-    className: 'string',
-    begin: 'u?r?"""', end: '"""',
-    relevance: 10
-  };
-  return {
-    keywords:
-      'type yield lazy override def with val var false true sealed abstract private trait ' +
-      'object null if for while throw finally protected extends import final return else ' +
-      'break new catch super class case package default try this match continue throws',
-    contains: [
-      {
-        className: 'javadoc',
-        begin: '/\\*\\*', end: '\\*/',
-        contains: [{
-          className: 'javadoctag',
-          begin: '@[A-Za-z]+'
-        }],
-        relevance: 10
-      },
-      hljs.C_LINE_COMMENT_MODE, hljs.C_BLOCK_COMMENT_MODE,
-      hljs.APOS_STRING_MODE, hljs.QUOTE_STRING_MODE, STRING,
-      {
-        className: 'class',
-        begin: '((case )?class |object |trait )', end: '({|$)', // beginWithKeyword won't work because a single "case" shouldn't start this mode
-        illegal: ':',
-        keywords: 'case class trait object',
-        contains: [
-          {
-            beginWithKeyword: true,
-            keywords: 'extends with',
-            relevance: 10
-          },
-          {
-            className: 'title',
-            begin: hljs.UNDERSCORE_IDENT_RE
-          },
-          {
-            className: 'params',
-            begin: '\\(', end: '\\)',
-            contains: [
-              hljs.APOS_STRING_MODE, hljs.QUOTE_STRING_MODE, STRING,
-              ANNOTATION
-            ]
-          }
-        ]
-      },
-      hljs.C_NUMBER_MODE,
-      ANNOTATION
-    ]
-  };
-};
 },{}],44:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
@@ -11678,89 +11767,6 @@ module.exports = function(hljs) {
       hljs.HASH_COMMENT_MODE,
       hljs.QUOTE_STRING_MODE,
       hljs.NUMBER_MODE
-    ]
-  };
-};
-},{}],45:[function(require,module,exports){
-module.exports = function(hljs) {
-  var OBJC_KEYWORDS = {
-    keyword:
-      'int float while private char catch export sizeof typedef const struct for union ' +
-      'unsigned long volatile static protected bool mutable if public do return goto void ' +
-      'enum else break extern class asm case short default double throw register explicit ' +
-      'signed typename try this switch continue wchar_t inline readonly assign property ' +
-      'protocol self synchronized end synthesize id optional required implementation ' +
-      'nonatomic interface super unichar finally dynamic IBOutlet IBAction selector strong ' +
-      'weak readonly',
-    literal:
-    	'false true FALSE TRUE nil YES NO NULL',
-    built_in:
-      'NSString NSDictionary CGRect CGPoint UIButton UILabel UITextView UIWebView MKMapView ' +
-      'UISegmentedControl NSObject UITableViewDelegate UITableViewDataSource NSThread ' +
-      'UIActivityIndicator UITabbar UIToolBar UIBarButtonItem UIImageView NSAutoreleasePool ' +
-      'UITableView BOOL NSInteger CGFloat NSException NSLog NSMutableString NSMutableArray ' +
-      'NSMutableDictionary NSURL NSIndexPath CGSize UITableViewCell UIView UIViewController ' +
-      'UINavigationBar UINavigationController UITabBarController UIPopoverController ' +
-      'UIPopoverControllerDelegate UIImage NSNumber UISearchBar NSFetchedResultsController ' +
-      'NSFetchedResultsChangeType UIScrollView UIScrollViewDelegate UIEdgeInsets UIColor ' +
-      'UIFont UIApplication NSNotFound NSNotificationCenter NSNotification ' +
-      'UILocalNotification NSBundle NSFileManager NSTimeInterval NSDate NSCalendar ' +
-      'NSUserDefaults UIWindow NSRange NSArray NSError NSURLRequest NSURLConnection class ' +
-      'UIInterfaceOrientation MPMoviePlayerController dispatch_once_t ' +
-      'dispatch_queue_t dispatch_sync dispatch_async dispatch_once'
-  };
-  return {
-    keywords: OBJC_KEYWORDS,
-    illegal: '</',
-    contains: [
-      hljs.C_LINE_COMMENT_MODE,
-      hljs.C_BLOCK_COMMENT_MODE,
-      hljs.C_NUMBER_MODE,
-      hljs.QUOTE_STRING_MODE,
-      {
-        className: 'string',
-        begin: '\'',
-        end: '[^\\\\]\'',
-        illegal: '[^\\\\][^\']'
-      },
-
-      {
-        className: 'preprocessor',
-        begin: '#import',
-        end: '$',
-        contains: [
-        {
-          className: 'title',
-          begin: '\"',
-          end: '\"'
-        },
-        {
-          className: 'title',
-          begin: '<',
-          end: '>'
-        }
-        ]
-      },
-      {
-        className: 'preprocessor',
-        begin: '#',
-        end: '$'
-      },
-      {
-        className: 'class',
-        beginWithKeyword: true,
-        end: '({|$)',
-        keywords: 'interface class protocol implementation',
-        contains: [{
-          className: 'id',
-          begin: hljs.UNDERSCORE_IDENT_RE
-        }
-        ]
-      },
-      {
-        className: 'variable',
-        begin: '\\.'+hljs.UNDERSCORE_IDENT_RE
-      }
     ]
   };
 };
@@ -11864,6 +11870,101 @@ module.exports = function(hljs) {
   }; // return
 };
 })()
+},{}],49:[function(require,module,exports){
+module.exports = function(hljs) {
+  var VARS = [
+    {
+      className: 'variable', begin: '\\$\\d+'
+    },
+    {
+      className: 'variable', begin: '\\${', end: '}'
+    },
+    {
+      className: 'variable', begin: '[\\$\\@]' + hljs.UNDERSCORE_IDENT_RE
+    }
+  ];
+  var DEFAULT = {
+    endsWithParent: true,
+    lexems: '[a-z/_]+',
+    keywords: {
+      built_in:
+        'on off yes no true false none blocked debug info notice warn error crit ' +
+        'select break last permanent redirect kqueue rtsig epoll poll /dev/poll'
+    },
+    relevance: 0,
+    illegal: '=>',
+    contains: [
+      hljs.HASH_COMMENT_MODE,
+      {
+        className: 'string',
+        begin: '"', end: '"',
+        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS),
+        relevance: 0
+      },
+      {
+        className: 'string',
+        begin: "'", end: "'",
+        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS),
+        relevance: 0
+      },
+      {
+        className: 'url',
+        begin: '([a-z]+):/', end: '\\s', endsWithParent: true, excludeEnd: true
+      },
+      {
+        className: 'regexp',
+        begin: "\\s\\^", end: "\\s|{|;", returnEnd: true,
+        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS)
+      },
+      // regexp locations (~, ~*)
+      {
+        className: 'regexp',
+        begin: "~\\*?\\s+", end: "\\s|{|;", returnEnd: true,
+        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS)
+      },
+      // *.example.com
+      {
+        className: 'regexp',
+        begin: "\\*(\\.[a-z\\-]+)+",
+        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS)
+      },
+      // sub.example.*
+      {
+        className: 'regexp',
+        begin: "([a-z\\-]+\\.)+\\*",
+        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS)
+      },
+      // IP
+      {
+        className: 'number',
+        begin: '\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d{1,5})?\\b'
+      },
+      // units
+      {
+        className: 'number',
+        begin: '\\b\\d+[kKmMgGdshdwy]*\\b',
+        relevance: 0
+      }
+    ].concat(VARS)
+  };
+
+  return {
+    contains: [
+      hljs.HASH_COMMENT_MODE,
+      {
+        begin: hljs.UNDERSCORE_IDENT_RE + '\\s', end: ';|{', returnBegin: true,
+        contains: [
+          {
+            className: 'title',
+            begin: hljs.UNDERSCORE_IDENT_RE,
+            starts: DEFAULT
+          }
+        ]
+      }
+    ],
+    illegal: '[^\\s\\}]'
+  };
+};
 },{}],48:[function(require,module,exports){
 module.exports = function(hljs) {
   var KEYWORDS = {
@@ -11964,101 +12065,6 @@ module.exports = function(hljs) {
         begin: '@' + JS_IDENT_RE
       }
     ]
-  };
-};
-},{}],49:[function(require,module,exports){
-module.exports = function(hljs) {
-  var VARS = [
-    {
-      className: 'variable', begin: '\\$\\d+'
-    },
-    {
-      className: 'variable', begin: '\\${', end: '}'
-    },
-    {
-      className: 'variable', begin: '[\\$\\@]' + hljs.UNDERSCORE_IDENT_RE
-    }
-  ];
-  var DEFAULT = {
-    endsWithParent: true,
-    lexems: '[a-z/_]+',
-    keywords: {
-      built_in:
-        'on off yes no true false none blocked debug info notice warn error crit ' +
-        'select break last permanent redirect kqueue rtsig epoll poll /dev/poll'
-    },
-    relevance: 0,
-    illegal: '=>',
-    contains: [
-      hljs.HASH_COMMENT_MODE,
-      {
-        className: 'string',
-        begin: '"', end: '"',
-        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS),
-        relevance: 0
-      },
-      {
-        className: 'string',
-        begin: "'", end: "'",
-        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS),
-        relevance: 0
-      },
-      {
-        className: 'url',
-        begin: '([a-z]+):/', end: '\\s', endsWithParent: true, excludeEnd: true
-      },
-      {
-        className: 'regexp',
-        begin: "\\s\\^", end: "\\s|{|;", returnEnd: true,
-        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS)
-      },
-      // regexp locations (~, ~*)
-      {
-        className: 'regexp',
-        begin: "~\\*?\\s+", end: "\\s|{|;", returnEnd: true,
-        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS)
-      },
-      // *.example.com
-      {
-        className: 'regexp',
-        begin: "\\*(\\.[a-z\\-]+)+",
-        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS)
-      },
-      // sub.example.*
-      {
-        className: 'regexp',
-        begin: "([a-z\\-]+\\.)+\\*",
-        contains: [hljs.BACKSLASH_ESCAPE].concat(VARS)
-      },
-      // IP
-      {
-        className: 'number',
-        begin: '\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d{1,5})?\\b'
-      },
-      // units
-      {
-        className: 'number',
-        begin: '\\b\\d+[kKmMgGdshdwy]*\\b',
-        relevance: 0
-      }
-    ].concat(VARS)
-  };
-
-  return {
-    contains: [
-      hljs.HASH_COMMENT_MODE,
-      {
-        begin: hljs.UNDERSCORE_IDENT_RE + '\\s', end: ';|{', returnBegin: true,
-        contains: [
-          {
-            className: 'title',
-            begin: hljs.UNDERSCORE_IDENT_RE,
-            starts: DEFAULT
-          }
-        ]
-      }
-    ],
-    illegal: '[^\\s\\}]'
   };
 };
 },{}],50:[function(require,module,exports){
@@ -12188,44 +12194,6 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],52:[function(require,module,exports){
-module.exports = function(hljs) {
-  var LITERALS = {literal: 'true false null'};
-  var TYPES = [
-    hljs.QUOTE_STRING_MODE,
-    hljs.C_NUMBER_MODE
-  ];
-  var VALUE_CONTAINER = {
-    className: 'value',
-    end: ',', endsWithParent: true, excludeEnd: true,
-    contains: TYPES,
-    keywords: LITERALS
-  };
-  var OBJECT = {
-    begin: '{', end: '}',
-    contains: [
-      {
-        className: 'attribute',
-        begin: '\\s*"', end: '"\\s*:\\s*', excludeBegin: true, excludeEnd: true,
-        contains: [hljs.BACKSLASH_ESCAPE],
-        illegal: '\\n',
-        starts: VALUE_CONTAINER
-      }
-    ],
-    illegal: '\\S'
-  };
-  var ARRAY = {
-    begin: '\\[', end: '\\]',
-    contains: [hljs.inherit(VALUE_CONTAINER, {className: null})], // inherit is also a workaround for a bug that makes shared modes with endsWithParent compile only the ending of one of the parents
-    illegal: '\\S'
-  };
-  TYPES.splice(TYPES.length, 0, OBJECT, ARRAY);
-  return {
-    contains: TYPES,
-    keywords: LITERALS,
-    illegal: '\\S'
-  };
-};
 },{}],53:[function(require,module,exports){
 module.exports = function(hljs) {
 
@@ -12308,6 +12276,41 @@ module.exports = function(hljs) {
   result.case_insensitive = true;
   return result;
 };
+},{}],55:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    case_insensitive: true,
+    keywords: {
+      keyword:
+        'call class const dim do loop erase execute executeglobal exit for each next function ' +
+        'if then else on error option explicit new private property let get public randomize ' +
+        'redim rem select case set stop sub while wend with end to elseif is or xor and not ' +
+        'class_initialize class_terminate default preserve in me byval byref step resume goto',
+      built_in:
+        'lcase month vartype instrrev ubound setlocale getobject rgb getref string ' +
+        'weekdayname rnd dateadd monthname now day minute isarray cbool round formatcurrency ' +
+        'conversions csng timevalue second year space abs clng timeserial fixs len asc ' +
+        'isempty maths dateserial atn timer isobject filter weekday datevalue ccur isdate ' +
+        'instr datediff formatdatetime replace isnull right sgn array snumeric log cdbl hex ' +
+        'chr lbound msgbox ucase getlocale cos cdate cbyte rtrim join hour oct typename trim ' +
+        'strcomp int createobject loadpicture tan formatnumber mid scriptenginebuildversion ' +
+        'scriptengine split scriptengineminorversion cint sin datepart ltrim sqr ' +
+        'scriptenginemajorversion time derived eval date formatpercent exp inputbox left ascw ' +
+        'chrw regexp server response request cstr err',
+      literal:
+        'true false null nothing empty'
+    },
+    illegal: '//',
+    contains: [
+      hljs.inherit(hljs.QUOTE_STRING_MODE, {contains: [{begin: '""'}]}),
+      {
+        className: 'comment',
+        begin: '\'', end: '$'
+      },
+      hljs.C_NUMBER_MODE
+    ]
+  };
+};
 },{}],54:[function(require,module,exports){
 module.exports = function(hljs) {
   var DELPHI_KEYWORDS = 'and safecall cdecl then string exports library not pascal set ' +
@@ -12382,41 +12385,252 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],55:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module.exports = function(hljs) {
+  var NUMBER = {className: 'number', begin: '[\\$%]\\d+'};
   return {
     case_insensitive: true,
     keywords: {
-      keyword:
-        'call class const dim do loop erase execute executeglobal exit for each next function ' +
-        'if then else on error option explicit new private property let get public randomize ' +
-        'redim rem select case set stop sub while wend with end to elseif is or xor and not ' +
-        'class_initialize class_terminate default preserve in me byval byref step resume goto',
-      built_in:
-        'lcase month vartype instrrev ubound setlocale getobject rgb getref string ' +
-        'weekdayname rnd dateadd monthname now day minute isarray cbool round formatcurrency ' +
-        'conversions csng timevalue second year space abs clng timeserial fixs len asc ' +
-        'isempty maths dateserial atn timer isobject filter weekday datevalue ccur isdate ' +
-        'instr datediff formatdatetime replace isnull right sgn array snumeric log cdbl hex ' +
-        'chr lbound msgbox ucase getlocale cos cdate cbyte rtrim join hour oct typename trim ' +
-        'strcomp int createobject loadpicture tan formatnumber mid scriptenginebuildversion ' +
-        'scriptengine split scriptengineminorversion cint sin datepart ltrim sqr ' +
-        'scriptenginemajorversion time derived eval date formatpercent exp inputbox left ascw ' +
-        'chrw regexp server response request cstr err',
-      literal:
-        'true false null nothing empty'
+      keyword: 'acceptfilter acceptmutex acceptpathinfo accessfilename action addalt ' +
+        'addaltbyencoding addaltbytype addcharset adddefaultcharset adddescription ' +
+        'addencoding addhandler addicon addiconbyencoding addiconbytype addinputfilter ' +
+        'addlanguage addmoduleinfo addoutputfilter addoutputfilterbytype addtype alias ' +
+        'aliasmatch allow allowconnect allowencodedslashes allowoverride anonymous ' +
+        'anonymous_logemail anonymous_mustgiveemail anonymous_nouserid anonymous_verifyemail ' +
+        'authbasicauthoritative authbasicprovider authdbduserpwquery authdbduserrealmquery ' +
+        'authdbmgroupfile authdbmtype authdbmuserfile authdefaultauthoritative ' +
+        'authdigestalgorithm authdigestdomain authdigestnccheck authdigestnonceformat ' +
+        'authdigestnoncelifetime authdigestprovider authdigestqop authdigestshmemsize ' +
+        'authgroupfile authldapbinddn authldapbindpassword authldapcharsetconfig ' +
+        'authldapcomparednonserver authldapdereferencealiases authldapgroupattribute ' +
+        'authldapgroupattributeisdn authldapremoteuserattribute authldapremoteuserisdn ' +
+        'authldapurl authname authnprovideralias authtype authuserfile authzdbmauthoritative ' +
+        'authzdbmtype authzdefaultauthoritative authzgroupfileauthoritative ' +
+        'authzldapauthoritative authzownerauthoritative authzuserauthoritative ' +
+        'balancermember browsermatch browsermatchnocase bufferedlogs cachedefaultexpire ' +
+        'cachedirlength cachedirlevels cachedisable cacheenable cachefile ' +
+        'cacheignorecachecontrol cacheignoreheaders cacheignorenolastmod ' +
+        'cacheignorequerystring cachelastmodifiedfactor cachemaxexpire cachemaxfilesize ' +
+        'cacheminfilesize cachenegotiateddocs cacheroot cachestorenostore cachestoreprivate ' +
+        'cgimapextension charsetdefault charsetoptions charsetsourceenc checkcaseonly ' +
+        'checkspelling chrootdir contentdigest cookiedomain cookieexpires cookielog ' +
+        'cookiename cookiestyle cookietracking coredumpdirectory customlog dav ' +
+        'davdepthinfinity davgenericlockdb davlockdb davmintimeout dbdexptime dbdkeep ' +
+        'dbdmax dbdmin dbdparams dbdpersist dbdpreparesql dbdriver defaulticon ' +
+        'defaultlanguage defaulttype deflatebuffersize deflatecompressionlevel ' +
+        'deflatefilternote deflatememlevel deflatewindowsize deny directoryindex ' +
+        'directorymatch directoryslash documentroot dumpioinput dumpiologlevel dumpiooutput ' +
+        'enableexceptionhook enablemmap enablesendfile errordocument errorlog example ' +
+        'expiresactive expiresbytype expiresdefault extendedstatus extfilterdefine ' +
+        'extfilteroptions fileetag filterchain filterdeclare filterprotocol filterprovider ' +
+        'filtertrace forcelanguagepriority forcetype forensiclog gracefulshutdowntimeout ' +
+        'group header headername hostnamelookups identitycheck identitychecktimeout ' +
+        'imapbase imapdefault imapmenu include indexheadinsert indexignore indexoptions ' +
+        'indexorderdefault indexstylesheet isapiappendlogtoerrors isapiappendlogtoquery ' +
+        'isapicachefile isapifakeasync isapilognotsupported isapireadaheadbuffer keepalive ' +
+        'keepalivetimeout languagepriority ldapcacheentries ldapcachettl ' +
+        'ldapconnectiontimeout ldapopcacheentries ldapopcachettl ldapsharedcachefile ' +
+        'ldapsharedcachesize ldaptrustedclientcert ldaptrustedglobalcert ldaptrustedmode ' +
+        'ldapverifyservercert limitinternalrecursion limitrequestbody limitrequestfields ' +
+        'limitrequestfieldsize limitrequestline limitxmlrequestbody listen listenbacklog ' +
+        'loadfile loadmodule lockfile logformat loglevel maxclients maxkeepaliverequests ' +
+        'maxmemfree maxrequestsperchild maxrequestsperthread maxspareservers maxsparethreads ' +
+        'maxthreads mcachemaxobjectcount mcachemaxobjectsize mcachemaxstreamingbuffer ' +
+        'mcacheminobjectsize mcacheremovalalgorithm mcachesize metadir metafiles metasuffix ' +
+        'mimemagicfile minspareservers minsparethreads mmapfile mod_gzip_on ' +
+        'mod_gzip_add_header_count mod_gzip_keep_workfiles mod_gzip_dechunk ' +
+        'mod_gzip_min_http mod_gzip_minimum_file_size mod_gzip_maximum_file_size ' +
+        'mod_gzip_maximum_inmem_size mod_gzip_temp_dir mod_gzip_item_include ' +
+        'mod_gzip_item_exclude mod_gzip_command_version mod_gzip_can_negotiate ' +
+        'mod_gzip_handle_methods mod_gzip_static_suffix mod_gzip_send_vary ' +
+        'mod_gzip_update_static modmimeusepathinfo multiviewsmatch namevirtualhost noproxy ' +
+        'nwssltrustedcerts nwsslupgradeable options order passenv pidfile protocolecho ' +
+        'proxybadheader proxyblock proxydomain proxyerroroverride proxyftpdircharset ' +
+        'proxyiobuffersize proxymaxforwards proxypass proxypassinterpolateenv ' +
+        'proxypassmatch proxypassreverse proxypassreversecookiedomain ' +
+        'proxypassreversecookiepath proxypreservehost proxyreceivebuffersize proxyremote ' +
+        'proxyremotematch proxyrequests proxyset proxystatus proxytimeout proxyvia ' +
+        'readmename receivebuffersize redirect redirectmatch redirectpermanent ' +
+        'redirecttemp removecharset removeencoding removehandler removeinputfilter ' +
+        'removelanguage removeoutputfilter removetype requestheader require rewritebase ' +
+        'rewritecond rewriteengine rewritelock rewritelog rewriteloglevel rewritemap ' +
+        'rewriteoptions rewriterule rlimitcpu rlimitmem rlimitnproc satisfy scoreboardfile ' +
+        'script scriptalias scriptaliasmatch scriptinterpretersource scriptlog ' +
+        'scriptlogbuffer scriptloglength scriptsock securelisten seerequesttail ' +
+        'sendbuffersize serveradmin serveralias serverlimit servername serverpath ' +
+        'serverroot serversignature servertokens setenv setenvif setenvifnocase sethandler ' +
+        'setinputfilter setoutputfilter ssienableaccess ssiendtag ssierrormsg ssistarttag ' +
+        'ssitimeformat ssiundefinedecho sslcacertificatefile sslcacertificatepath ' +
+        'sslcadnrequestfile sslcadnrequestpath sslcarevocationfile sslcarevocationpath ' +
+        'sslcertificatechainfile sslcertificatefile sslcertificatekeyfile sslciphersuite ' +
+        'sslcryptodevice sslengine sslhonorciperorder sslmutex ssloptions ' +
+        'sslpassphrasedialog sslprotocol sslproxycacertificatefile ' +
+        'sslproxycacertificatepath sslproxycarevocationfile sslproxycarevocationpath ' +
+        'sslproxyciphersuite sslproxyengine sslproxymachinecertificatefile ' +
+        'sslproxymachinecertificatepath sslproxyprotocol sslproxyverify ' +
+        'sslproxyverifydepth sslrandomseed sslrequire sslrequiressl sslsessioncache ' +
+        'sslsessioncachetimeout sslusername sslverifyclient sslverifydepth startservers ' +
+        'startthreads substitute suexecusergroup threadlimit threadsperchild ' +
+        'threadstacksize timeout traceenable transferlog typesconfig unsetenv ' +
+        'usecanonicalname usecanonicalphysicalport user userdir virtualdocumentroot ' +
+        'virtualdocumentrootip virtualscriptalias virtualscriptaliasip ' +
+        'win32disableacceptex xbithack',
+      literal: 'on off'
     },
-    illegal: '//',
     contains: [
-      hljs.inherit(hljs.QUOTE_STRING_MODE, {contains: [{begin: '""'}]}),
+      hljs.HASH_COMMENT_MODE,
       {
-        className: 'comment',
-        begin: '\'', end: '$'
+        className: 'sqbracket',
+        begin: '\\s\\[', end: '\\]$'
       },
-      hljs.C_NUMBER_MODE
+      {
+        className: 'cbracket',
+        begin: '[\\$%]\\{', end: '\\}',
+        contains: ['self', NUMBER]
+      },
+      NUMBER,
+      {className: 'tag', begin: '</?', end: '>'},
+      hljs.QUOTE_STRING_MODE
     ]
   };
 };
+},{}],52:[function(require,module,exports){
+module.exports = function(hljs) {
+  var LITERALS = {literal: 'true false null'};
+  var TYPES = [
+    hljs.QUOTE_STRING_MODE,
+    hljs.C_NUMBER_MODE
+  ];
+  var VALUE_CONTAINER = {
+    className: 'value',
+    end: ',', endsWithParent: true, excludeEnd: true,
+    contains: TYPES,
+    keywords: LITERALS
+  };
+  var OBJECT = {
+    begin: '{', end: '}',
+    contains: [
+      {
+        className: 'attribute',
+        begin: '\\s*"', end: '"\\s*:\\s*', excludeBegin: true, excludeEnd: true,
+        contains: [hljs.BACKSLASH_ESCAPE],
+        illegal: '\\n',
+        starts: VALUE_CONTAINER
+      }
+    ],
+    illegal: '\\S'
+  };
+  var ARRAY = {
+    begin: '\\[', end: '\\]',
+    contains: [hljs.inherit(VALUE_CONTAINER, {className: null})], // inherit is also a workaround for a bug that makes shared modes with endsWithParent compile only the ending of one of the parents
+    illegal: '\\S'
+  };
+  TYPES.splice(TYPES.length, 0, OBJECT, ARRAY);
+  return {
+    contains: TYPES,
+    keywords: LITERALS,
+    illegal: '\\S'
+  };
+};
+},{}],58:[function(require,module,exports){
+(function(){module.exports = function(hljs) {
+  var STRING = hljs.inherit(hljs.QUOTE_STRING_MODE, {illegal: ''});
+  var TITLE = {
+    className: 'title', begin: hljs.UNDERSCORE_IDENT_RE
+  };
+  var PARAMS = {
+    className: 'params',
+    begin: '\\(', end: '\\)',
+    contains: ['self', hljs.C_NUMBER_MODE, STRING]
+  };
+  var COMMENTS = [
+    {
+      className: 'comment',
+      begin: '--', end: '$',
+    },
+    {
+      className: 'comment',
+      begin: '\\(\\*', end: '\\*\\)',
+      contains: ['self', {begin: '--', end: '$'}] //allow nesting
+    },
+    hljs.HASH_COMMENT_MODE
+  ];
+
+  return {
+    keywords: {
+      keyword:
+        'about above after against and around as at back before beginning ' +
+        'behind below beneath beside between but by considering ' +
+        'contain contains continue copy div does eighth else end equal ' +
+        'equals error every exit fifth first for fourth from front ' +
+        'get given global if ignoring in into is it its last local me ' +
+        'middle mod my ninth not of on onto or over prop property put ref ' +
+        'reference repeat returning script second set seventh since ' +
+        'sixth some tell tenth that the then third through thru ' +
+        'timeout times to transaction try until where while whose with ' +
+        'without',
+      constant:
+        'AppleScript false linefeed return pi quote result space tab true',
+      type:
+        'alias application boolean class constant date file integer list ' +
+        'number real record string text',
+      command:
+        'activate beep count delay launch log offset read round ' +
+        'run say summarize write',
+      property:
+        'character characters contents day frontmost id item length ' +
+        'month name paragraph paragraphs rest reverse running time version ' +
+        'weekday word words year'
+    },
+    contains: [
+      STRING,
+      hljs.C_NUMBER_MODE,
+      {
+        className: 'type',
+        begin: '\\bPOSIX file\\b'
+      },
+      {
+        className: 'command',
+        begin:
+          '\\b(clipboard info|the clipboard|info for|list (disks|folder)|' +
+          'mount volume|path to|(close|open for) access|(get|set) eof|' +
+          'current date|do shell script|get volume settings|random number|' +
+          'set volume|system attribute|system info|time to GMT|' +
+          '(load|run|store) script|scripting components|' +
+          'ASCII (character|number)|localized string|' +
+          'choose (application|color|file|file name|' +
+          'folder|from list|remote application|URL)|' +
+          'display (alert|dialog))\\b|^\\s*return\\b'
+      },
+      {
+        className: 'constant',
+        begin:
+          '\\b(text item delimiters|current application|missing value)\\b'
+      },
+      {
+        className: 'keyword',
+        begin:
+          '\\b(apart from|aside from|instead of|out of|greater than|' +
+          "isn't|(doesn't|does not) (equal|come before|come after|contain)|" +
+          '(greater|less) than( or equal)?|(starts?|ends|begins?) with|' +
+          'contained by|comes (before|after)|a (ref|reference))\\b'
+      },
+      {
+        className: 'property',
+        begin:
+          '\\b(POSIX path|(date|time) string|quoted form)\\b'
+      },
+      {
+        className: 'function_start',
+        beginWithKeyword: true,
+        keywords: 'on',
+        illegal: '[${=;\\n]',
+        contains: [TITLE, PARAMS]
+      }
+    ].concat(COMMENTS)
+  };
+};
+})()
 },{}],56:[function(require,module,exports){
 (function(){module.exports = function(hljs) {
   return {
@@ -12649,246 +12863,7 @@ module.exports = function(hljs) {
   };
 };
 })()
-},{}],57:[function(require,module,exports){
-module.exports = function(hljs) {
-  return {
-    case_insensitive: true,
-    keywords: {
-      flow: 'if else goto for in do call exit not exist errorlevel defined equ neq lss leq gtr geq',
-      keyword: 'shift cd dir echo setlocal endlocal set pause copy',
-      stream: 'prn nul lpt3 lpt2 lpt1 con com4 com3 com2 com1 aux',
-      winutils: 'ping net ipconfig taskkill xcopy ren del'
-    },
-    contains: [
-      {
-        className: 'envvar', begin: '%%[^ ]'
-      },
-      {
-        className: 'envvar', begin: '%[^ ]+?%'
-      },
-      {
-        className: 'envvar', begin: '![^ ]+?!'
-      },
-      {
-        className: 'number', begin: '\\b\\d+',
-        relevance: 0
-      },
-      {
-        className: 'comment',
-        begin: '@?rem', end: '$'
-      }
-    ]
-  };
-};
-},{}],58:[function(require,module,exports){
-module.exports = function(hljs) {
-  var NUMBER = {className: 'number', begin: '[\\$%]\\d+'};
-  return {
-    case_insensitive: true,
-    keywords: {
-      keyword: 'acceptfilter acceptmutex acceptpathinfo accessfilename action addalt ' +
-        'addaltbyencoding addaltbytype addcharset adddefaultcharset adddescription ' +
-        'addencoding addhandler addicon addiconbyencoding addiconbytype addinputfilter ' +
-        'addlanguage addmoduleinfo addoutputfilter addoutputfilterbytype addtype alias ' +
-        'aliasmatch allow allowconnect allowencodedslashes allowoverride anonymous ' +
-        'anonymous_logemail anonymous_mustgiveemail anonymous_nouserid anonymous_verifyemail ' +
-        'authbasicauthoritative authbasicprovider authdbduserpwquery authdbduserrealmquery ' +
-        'authdbmgroupfile authdbmtype authdbmuserfile authdefaultauthoritative ' +
-        'authdigestalgorithm authdigestdomain authdigestnccheck authdigestnonceformat ' +
-        'authdigestnoncelifetime authdigestprovider authdigestqop authdigestshmemsize ' +
-        'authgroupfile authldapbinddn authldapbindpassword authldapcharsetconfig ' +
-        'authldapcomparednonserver authldapdereferencealiases authldapgroupattribute ' +
-        'authldapgroupattributeisdn authldapremoteuserattribute authldapremoteuserisdn ' +
-        'authldapurl authname authnprovideralias authtype authuserfile authzdbmauthoritative ' +
-        'authzdbmtype authzdefaultauthoritative authzgroupfileauthoritative ' +
-        'authzldapauthoritative authzownerauthoritative authzuserauthoritative ' +
-        'balancermember browsermatch browsermatchnocase bufferedlogs cachedefaultexpire ' +
-        'cachedirlength cachedirlevels cachedisable cacheenable cachefile ' +
-        'cacheignorecachecontrol cacheignoreheaders cacheignorenolastmod ' +
-        'cacheignorequerystring cachelastmodifiedfactor cachemaxexpire cachemaxfilesize ' +
-        'cacheminfilesize cachenegotiateddocs cacheroot cachestorenostore cachestoreprivate ' +
-        'cgimapextension charsetdefault charsetoptions charsetsourceenc checkcaseonly ' +
-        'checkspelling chrootdir contentdigest cookiedomain cookieexpires cookielog ' +
-        'cookiename cookiestyle cookietracking coredumpdirectory customlog dav ' +
-        'davdepthinfinity davgenericlockdb davlockdb davmintimeout dbdexptime dbdkeep ' +
-        'dbdmax dbdmin dbdparams dbdpersist dbdpreparesql dbdriver defaulticon ' +
-        'defaultlanguage defaulttype deflatebuffersize deflatecompressionlevel ' +
-        'deflatefilternote deflatememlevel deflatewindowsize deny directoryindex ' +
-        'directorymatch directoryslash documentroot dumpioinput dumpiologlevel dumpiooutput ' +
-        'enableexceptionhook enablemmap enablesendfile errordocument errorlog example ' +
-        'expiresactive expiresbytype expiresdefault extendedstatus extfilterdefine ' +
-        'extfilteroptions fileetag filterchain filterdeclare filterprotocol filterprovider ' +
-        'filtertrace forcelanguagepriority forcetype forensiclog gracefulshutdowntimeout ' +
-        'group header headername hostnamelookups identitycheck identitychecktimeout ' +
-        'imapbase imapdefault imapmenu include indexheadinsert indexignore indexoptions ' +
-        'indexorderdefault indexstylesheet isapiappendlogtoerrors isapiappendlogtoquery ' +
-        'isapicachefile isapifakeasync isapilognotsupported isapireadaheadbuffer keepalive ' +
-        'keepalivetimeout languagepriority ldapcacheentries ldapcachettl ' +
-        'ldapconnectiontimeout ldapopcacheentries ldapopcachettl ldapsharedcachefile ' +
-        'ldapsharedcachesize ldaptrustedclientcert ldaptrustedglobalcert ldaptrustedmode ' +
-        'ldapverifyservercert limitinternalrecursion limitrequestbody limitrequestfields ' +
-        'limitrequestfieldsize limitrequestline limitxmlrequestbody listen listenbacklog ' +
-        'loadfile loadmodule lockfile logformat loglevel maxclients maxkeepaliverequests ' +
-        'maxmemfree maxrequestsperchild maxrequestsperthread maxspareservers maxsparethreads ' +
-        'maxthreads mcachemaxobjectcount mcachemaxobjectsize mcachemaxstreamingbuffer ' +
-        'mcacheminobjectsize mcacheremovalalgorithm mcachesize metadir metafiles metasuffix ' +
-        'mimemagicfile minspareservers minsparethreads mmapfile mod_gzip_on ' +
-        'mod_gzip_add_header_count mod_gzip_keep_workfiles mod_gzip_dechunk ' +
-        'mod_gzip_min_http mod_gzip_minimum_file_size mod_gzip_maximum_file_size ' +
-        'mod_gzip_maximum_inmem_size mod_gzip_temp_dir mod_gzip_item_include ' +
-        'mod_gzip_item_exclude mod_gzip_command_version mod_gzip_can_negotiate ' +
-        'mod_gzip_handle_methods mod_gzip_static_suffix mod_gzip_send_vary ' +
-        'mod_gzip_update_static modmimeusepathinfo multiviewsmatch namevirtualhost noproxy ' +
-        'nwssltrustedcerts nwsslupgradeable options order passenv pidfile protocolecho ' +
-        'proxybadheader proxyblock proxydomain proxyerroroverride proxyftpdircharset ' +
-        'proxyiobuffersize proxymaxforwards proxypass proxypassinterpolateenv ' +
-        'proxypassmatch proxypassreverse proxypassreversecookiedomain ' +
-        'proxypassreversecookiepath proxypreservehost proxyreceivebuffersize proxyremote ' +
-        'proxyremotematch proxyrequests proxyset proxystatus proxytimeout proxyvia ' +
-        'readmename receivebuffersize redirect redirectmatch redirectpermanent ' +
-        'redirecttemp removecharset removeencoding removehandler removeinputfilter ' +
-        'removelanguage removeoutputfilter removetype requestheader require rewritebase ' +
-        'rewritecond rewriteengine rewritelock rewritelog rewriteloglevel rewritemap ' +
-        'rewriteoptions rewriterule rlimitcpu rlimitmem rlimitnproc satisfy scoreboardfile ' +
-        'script scriptalias scriptaliasmatch scriptinterpretersource scriptlog ' +
-        'scriptlogbuffer scriptloglength scriptsock securelisten seerequesttail ' +
-        'sendbuffersize serveradmin serveralias serverlimit servername serverpath ' +
-        'serverroot serversignature servertokens setenv setenvif setenvifnocase sethandler ' +
-        'setinputfilter setoutputfilter ssienableaccess ssiendtag ssierrormsg ssistarttag ' +
-        'ssitimeformat ssiundefinedecho sslcacertificatefile sslcacertificatepath ' +
-        'sslcadnrequestfile sslcadnrequestpath sslcarevocationfile sslcarevocationpath ' +
-        'sslcertificatechainfile sslcertificatefile sslcertificatekeyfile sslciphersuite ' +
-        'sslcryptodevice sslengine sslhonorciperorder sslmutex ssloptions ' +
-        'sslpassphrasedialog sslprotocol sslproxycacertificatefile ' +
-        'sslproxycacertificatepath sslproxycarevocationfile sslproxycarevocationpath ' +
-        'sslproxyciphersuite sslproxyengine sslproxymachinecertificatefile ' +
-        'sslproxymachinecertificatepath sslproxyprotocol sslproxyverify ' +
-        'sslproxyverifydepth sslrandomseed sslrequire sslrequiressl sslsessioncache ' +
-        'sslsessioncachetimeout sslusername sslverifyclient sslverifydepth startservers ' +
-        'startthreads substitute suexecusergroup threadlimit threadsperchild ' +
-        'threadstacksize timeout traceenable transferlog typesconfig unsetenv ' +
-        'usecanonicalname usecanonicalphysicalport user userdir virtualdocumentroot ' +
-        'virtualdocumentrootip virtualscriptalias virtualscriptaliasip ' +
-        'win32disableacceptex xbithack',
-      literal: 'on off'
-    },
-    contains: [
-      hljs.HASH_COMMENT_MODE,
-      {
-        className: 'sqbracket',
-        begin: '\\s\\[', end: '\\]$'
-      },
-      {
-        className: 'cbracket',
-        begin: '[\\$%]\\{', end: '\\}',
-        contains: ['self', NUMBER]
-      },
-      NUMBER,
-      {className: 'tag', begin: '</?', end: '>'},
-      hljs.QUOTE_STRING_MODE
-    ]
-  };
-};
 },{}],59:[function(require,module,exports){
-(function(){module.exports = function(hljs) {
-  var STRING = hljs.inherit(hljs.QUOTE_STRING_MODE, {illegal: ''});
-  var TITLE = {
-    className: 'title', begin: hljs.UNDERSCORE_IDENT_RE
-  };
-  var PARAMS = {
-    className: 'params',
-    begin: '\\(', end: '\\)',
-    contains: ['self', hljs.C_NUMBER_MODE, STRING]
-  };
-  var COMMENTS = [
-    {
-      className: 'comment',
-      begin: '--', end: '$',
-    },
-    {
-      className: 'comment',
-      begin: '\\(\\*', end: '\\*\\)',
-      contains: ['self', {begin: '--', end: '$'}] //allow nesting
-    },
-    hljs.HASH_COMMENT_MODE
-  ];
-
-  return {
-    keywords: {
-      keyword:
-        'about above after against and around as at back before beginning ' +
-        'behind below beneath beside between but by considering ' +
-        'contain contains continue copy div does eighth else end equal ' +
-        'equals error every exit fifth first for fourth from front ' +
-        'get given global if ignoring in into is it its last local me ' +
-        'middle mod my ninth not of on onto or over prop property put ref ' +
-        'reference repeat returning script second set seventh since ' +
-        'sixth some tell tenth that the then third through thru ' +
-        'timeout times to transaction try until where while whose with ' +
-        'without',
-      constant:
-        'AppleScript false linefeed return pi quote result space tab true',
-      type:
-        'alias application boolean class constant date file integer list ' +
-        'number real record string text',
-      command:
-        'activate beep count delay launch log offset read round ' +
-        'run say summarize write',
-      property:
-        'character characters contents day frontmost id item length ' +
-        'month name paragraph paragraphs rest reverse running time version ' +
-        'weekday word words year'
-    },
-    contains: [
-      STRING,
-      hljs.C_NUMBER_MODE,
-      {
-        className: 'type',
-        begin: '\\bPOSIX file\\b'
-      },
-      {
-        className: 'command',
-        begin:
-          '\\b(clipboard info|the clipboard|info for|list (disks|folder)|' +
-          'mount volume|path to|(close|open for) access|(get|set) eof|' +
-          'current date|do shell script|get volume settings|random number|' +
-          'set volume|system attribute|system info|time to GMT|' +
-          '(load|run|store) script|scripting components|' +
-          'ASCII (character|number)|localized string|' +
-          'choose (application|color|file|file name|' +
-          'folder|from list|remote application|URL)|' +
-          'display (alert|dialog))\\b|^\\s*return\\b'
-      },
-      {
-        className: 'constant',
-        begin:
-          '\\b(text item delimiters|current application|missing value)\\b'
-      },
-      {
-        className: 'keyword',
-        begin:
-          '\\b(apart from|aside from|instead of|out of|greater than|' +
-          "isn't|(doesn't|does not) (equal|come before|come after|contain)|" +
-          '(greater|less) than( or equal)?|(starts?|ends|begins?) with|' +
-          'contained by|comes (before|after)|a (ref|reference))\\b'
-      },
-      {
-        className: 'property',
-        begin:
-          '\\b(POSIX path|(date|time) string|quoted form)\\b'
-      },
-      {
-        className: 'function_start',
-        beginWithKeyword: true,
-        keywords: 'on',
-        illegal: '[${=;\\n]',
-        contains: [TITLE, PARAMS]
-      }
-    ].concat(COMMENTS)
-  };
-};
-})()
-},{}],60:[function(require,module,exports){
 module.exports = function(hljs) {
   var CPP_KEYWORDS = {
     keyword: 'false int float while private char catch export virtual operator sizeof ' +
@@ -12930,6 +12905,82 @@ module.exports = function(hljs) {
         relevance: 10,
         contains: ['self']
       }
+    ]
+  };
+};
+},{}],60:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    case_insensitive: true,
+    keywords: {
+      flow: 'if else goto for in do call exit not exist errorlevel defined equ neq lss leq gtr geq',
+      keyword: 'shift cd dir echo setlocal endlocal set pause copy',
+      stream: 'prn nul lpt3 lpt2 lpt1 con com4 com3 com2 com1 aux',
+      winutils: 'ping net ipconfig taskkill xcopy ren del'
+    },
+    contains: [
+      {
+        className: 'envvar', begin: '%%[^ ]'
+      },
+      {
+        className: 'envvar', begin: '%[^ ]+?%'
+      },
+      {
+        className: 'envvar', begin: '![^ ]+?!'
+      },
+      {
+        className: 'number', begin: '\\b\\d+',
+        relevance: 0
+      },
+      {
+        className: 'comment',
+        begin: '@?rem', end: '$'
+      }
+    ]
+  };
+};
+},{}],62:[function(require,module,exports){
+module.exports = function(hljs) {
+  return {
+    subLanguage: 'xml',
+    contains: [
+      {
+        className: 'comment',
+        begin: '^#', end: '$'
+      },
+      {
+        className: 'comment',
+        begin: '\\^rem{', end: '}',
+        relevance: 10,
+        contains: [
+          {
+            begin: '{', end: '}',
+            contains: ['self']
+          }
+        ]
+      },
+      {
+        className: 'preprocessor',
+        begin: '^@(?:BASE|USE|CLASS|OPTIONS)$',
+        relevance: 10
+      },
+      {
+        className: 'title',
+        begin: '@[\\w\\-]+\\[[\\w^;\\-]*\\](?:\\[[\\w^;\\-]*\\])?(?:.*)$'
+      },
+      {
+        className: 'variable',
+        begin: '\\$\\{?[\\w\\-\\.\\:]+\\}?'
+      },
+      {
+        className: 'keyword',
+        begin: '\\^[\\w\\-\\.\\:]+'
+      },
+      {
+        className: 'number',
+        begin: '\\^#[0-9a-fA-F]+'
+      },
+      hljs.C_NUMBER_MODE
     ]
   };
 };
@@ -13010,46 +13061,40 @@ module.exports = function(hljs) {
   };
 };
 })()
-},{}],62:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 module.exports = function(hljs) {
+  var GO_KEYWORDS = {
+    keyword:
+      'break default func interface select case map struct chan else goto package switch ' +
+      'const fallthrough if range type continue for import return var go defer',
+    constant:
+       'true false iota nil',
+    typename:
+      'bool byte complex64 complex128 float32 float64 int8 int16 int32 int64 string uint8 ' +
+      'uint16 uint32 uint64 int uint uintptr rune',
+    built_in:
+      'append cap close complex copy imag len make new panic print println real recover delete'
+  };
   return {
-    subLanguage: 'xml',
+    keywords: GO_KEYWORDS,
+    illegal: '</',
     contains: [
+      hljs.C_LINE_COMMENT_MODE,
+      hljs.C_BLOCK_COMMENT_MODE,
+      hljs.QUOTE_STRING_MODE,
       {
-        className: 'comment',
-        begin: '^#', end: '$'
+        className: 'string',
+        begin: '\'', end: '[^\\\\]\'',
+        relevance: 0
       },
       {
-        className: 'comment',
-        begin: '\\^rem{', end: '}',
-        relevance: 10,
-        contains: [
-          {
-            begin: '{', end: '}',
-            contains: ['self']
-          }
-        ]
-      },
-      {
-        className: 'preprocessor',
-        begin: '^@(?:BASE|USE|CLASS|OPTIONS)$',
-        relevance: 10
-      },
-      {
-        className: 'title',
-        begin: '@[\\w\\-]+\\[[\\w^;\\-]*\\](?:\\[[\\w^;\\-]*\\])?(?:.*)$'
-      },
-      {
-        className: 'variable',
-        begin: '\\$\\{?[\\w\\-\\.\\:]+\\}?'
-      },
-      {
-        className: 'keyword',
-        begin: '\\^[\\w\\-\\.\\:]+'
+        className: 'string',
+        begin: '`', end: '`'
       },
       {
         className: 'number',
-        begin: '\\^#[0-9a-fA-F]+'
+        begin: '[^a-zA-Z_0-9](\\-|\\+)?\\d+(\\.\\d+|\\/\\d+)?((d|e|f|l|s)(\\+|\\-)?\\d+)?',
+        relevance: 0
       },
       hljs.C_NUMBER_MODE
     ]
@@ -13152,45 +13197,6 @@ module.exports = function(hljs) {
     ]
   }
 };
-},{}],64:[function(require,module,exports){
-module.exports = function(hljs) {
-  var GO_KEYWORDS = {
-    keyword:
-      'break default func interface select case map struct chan else goto package switch ' +
-      'const fallthrough if range type continue for import return var go defer',
-    constant:
-       'true false iota nil',
-    typename:
-      'bool byte complex64 complex128 float32 float64 int8 int16 int32 int64 string uint8 ' +
-      'uint16 uint32 uint64 int uint uintptr rune',
-    built_in:
-      'append cap close complex copy imag len make new panic print println real recover delete'
-  };
-  return {
-    keywords: GO_KEYWORDS,
-    illegal: '</',
-    contains: [
-      hljs.C_LINE_COMMENT_MODE,
-      hljs.C_BLOCK_COMMENT_MODE,
-      hljs.QUOTE_STRING_MODE,
-      {
-        className: 'string',
-        begin: '\'', end: '[^\\\\]\'',
-        relevance: 0
-      },
-      {
-        className: 'string',
-        begin: '`', end: '`'
-      },
-      {
-        className: 'number',
-        begin: '[^a-zA-Z_0-9](\\-|\\+)?\\d+(\\.\\d+|\\/\\d+)?((d|e|f|l|s)(\\+|\\-)?\\d+)?',
-        relevance: 0
-      },
-      hljs.C_NUMBER_MODE
-    ]
-  };
-};
 },{}],2:[function(require,module,exports){
 var Handlebars = require('handlebars-runtime');
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
@@ -13213,6 +13219,39 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n";
   return buffer;
+  });
+
+},{"handlebars-runtime":65}],5:[function(require,module,exports){
+var Handlebars = require('handlebars-runtime');
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "";
+
+
+  return buffer;
+  });
+
+},{"handlebars-runtime":65}],3:[function(require,module,exports){
+var Handlebars = require('handlebars-runtime');
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "body {\n  background:#000;\n  color:#fff;\n  font-family:'Georgia';\n  margin:0;\n}\n\n@-webkit-keyframes blinker {\n  from { opacity: 1.0; }\n  to { opacity: 0.0; }\n}\n\nem {\n  -webkit-animation-name: blinker;\n  -webkit-animation-iteration-count: infinite;\n  -webkit-animation-timing-function: cubic-bezier(1.0,0,0,1.0);\n  -webkit-animation-duration: 800ms;\n}\n\nstrong {\n  font-weight:normal;\n  color:#FFF707;\n}\n\na {\n  color:#FFF707;\n  text-decoration:none;\n}\n";
+  });
+
+},{"handlebars-runtime":65}],4:[function(require,module,exports){
+var Handlebars = require('handlebars-runtime');
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "body {\n  font-family: 'Helvetica Neue';\n  letter-spacing:-3px;\n  background:#000;\n  background-size:100%;\n  color:#fff;\n  margin:0;\n  padding:.5em;\n}\n\nh1, h2, h3, p {\n  margin:0;\n  font-weight:200;\n}\n\ncode {\n  font-family: \"Menlo\", monospace;\n  letter-spacing: 0;\n}\n\nem, i {\n  font-weight: 200;\n}\n\nstrong, b {\n  font-weight: 400;\n}\n\nmark {\n  color: orange;\n}\n\na {\n  background: orange;\n  color:#000;\n  text-decoration:none;\n}\n\nimg {\n  width:100%;\n}\n\ndiv {\n  cursor:pointer;\n  cursor:hand;\n  position:absolute;\n  top:0;\n  left:0;\n}\n\nol, ul {\n  list-style-type: none;\n  margin: 0.5em 0;\n  padding: 0;\n}\n\nol li:before, ul li:before {\n  color: orange;\n}\n\nol {\n  counter-reset: list -1;\n}\n\nol li {\n  list-style-type: none;\n  counter-increment: list;\n}\n\nol li:before {\n  content: counter(list, binary) \" \";\n}\n\nul li:before {\n  content: \"- \";\n}\n\n/*\n\nSunburst-like style (c) Vasily Polovnyov <vast@whiteants.net>\n\n*/\n\npre code {\n  display: block; padding: 0.5em;\n  background: #000; color: #f8f8f8;\n}\n\npre .comment,\npre .template_comment,\npre .javadoc {\n  color: #aeaeae;\n  font-style: italic;\n}\n\npre .keyword,\npre .ruby .function .keyword,\npre .request,\npre .status,\npre .nginx .title {\n  color: #E28964;\n}\n\npre .function .keyword,\npre .sub .keyword,\npre .method,\npre .list .title {\n  color: #99CF50;\n}\n\npre .string,\npre .tag .value,\npre .cdata,\npre .filter .argument,\npre .attr_selector,\npre .apache .cbracket,\npre .date,\npre .tex .command {\n  color: #65B042;\n}\n\npre .subst {\n  color: #DAEFA3;\n}\n\npre .regexp {\n  color: #E9C062;\n}\n\npre .title,\npre .sub .identifier,\npre .pi,\npre .tag,\npre .tag .keyword,\npre .decorator,\npre .shebang,\npre .prompt {\n  color: #89BDFF;\n}\n\npre .class .title,\npre .haskell .type,\npre .smalltalk .class,\npre .javadoctag,\npre .yardoctag,\npre .phpdoc {\n  text-decoration: underline;\n}\n\npre .symbol,\npre .ruby .symbol .string,\npre .number {\n  color: #3387CC;\n}\n\npre .params,\npre .variable,\npre .clojure .attribute {\n  color: #3E87E3;\n}\n\npre .css .tag,\npre .rules .property,\npre .pseudo,\npre .tex .special {\n  color: #CDA869;\n}\n\npre .css .class {\n  color: #9B703F;\n}\n\npre .rules .keyword {\n  color: #C5AF75;\n}\n\npre .rules .value {\n  color: #CF6A4C;\n}\n\npre .css .id {\n  color: #8B98AB;\n}\n\npre .annotation,\npre .apache .sqbracket,\npre .nginx .built_in {\n  color: #9B859D;\n}\n\npre .preprocessor {\n  color: #8996A8;\n}\n\npre .hexcolor,\npre .css .value .number {\n  color: #DD7B3B;\n}\n\npre .css .function {\n  color: #DAD085;\n}\n\npre .diff .header,\npre .chunk,\npre .tex .formula {\n  background-color: #0E2231;\n  color: #F8F8F8;\n  font-style: italic;\n}\n\npre .diff .change {\n  background-color: #4A410D;\n  color: #F8F8F8;\n}\n\npre .addition {\n  background-color: #253B22;\n  color: #F8F8F8;\n}\n\npre .deletion {\n  background-color: #420E09;\n  color: #F8F8F8;\n}\n\npre .coffeescript .javascript,\npre .javascript .xml,\npre .tex .formula,\npre .xml .javascript,\npre .xml .vbscript,\npre .xml .css,\npre .xml .cdata {\n  opacity: 0.5;\n}\n";
   });
 
 },{"handlebars-runtime":65}],65:[function(require,module,exports){
@@ -13580,38 +13619,5 @@ Handlebars.template = Handlebars.VM.template;
 })(Handlebars);
 ;
 
-},{}],3:[function(require,module,exports){
-var Handlebars = require('handlebars-runtime');
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  
-
-
-  return "body {\n  background:#000;\n  color:#fff;\n  font-family:'Georgia';\n  margin:0;\n}\n\n@-webkit-keyframes blinker {\n  from { opacity: 1.0; }\n  to { opacity: 0.0; }\n}\n\nem {\n  -webkit-animation-name: blinker;\n  -webkit-animation-iteration-count: infinite;\n  -webkit-animation-timing-function: cubic-bezier(1.0,0,0,1.0);\n  -webkit-animation-duration: 800ms;\n}\n\nstrong {\n  font-weight:normal;\n  color:#FFF707;\n}\n\na {\n  color:#FFF707;\n  text-decoration:none;\n}\n";
-  });
-
-},{"handlebars-runtime":65}],4:[function(require,module,exports){
-var Handlebars = require('handlebars-runtime');
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  
-
-
-  return "body {\n  font-family: 'Helvetica Neue';\n  letter-spacing:-3px;\n  background:#000;\n  background-size:100%;\n  color:#fff;\n  margin:0;\n  padding:.5em;\n}\n\nh1, h2, h3, p {\n  margin:0;\n  font-weight:200;\n}\n\ncode {\n  font-family: \"Menlo\", monospace;\n  letter-spacing: 0;\n}\n\nem, i {\n  font-weight: 200;\n}\n\nstrong, b {\n  font-weight: 400;\n}\n\nmark {\n  color: orange;\n}\n\na {\n  background: orange;\n  color:#000;\n  text-decoration:none;\n}\n\nimg {\n  width:100%;\n}\n\ndiv {\n  cursor:pointer;\n  cursor:hand;\n  position:absolute;\n  top:0;\n  left:0;\n}\n\nol, ul {\n  list-style-type: none;\n  margin: 0.5em 0;\n  padding: 0;\n}\n\nol li:before, ul li:before {\n  color: orange;\n}\n\nol {\n  counter-reset: list -1;\n}\n\nol li {\n  list-style-type: none;\n  counter-increment: list;\n}\n\nol li:before {\n  content: counter(list, binary) \" \";\n}\n\nul li:before {\n  content: \"- \";\n}\n\n/*\n\nSunburst-like style (c) Vasily Polovnyov <vast@whiteants.net>\n\n*/\n\npre code {\n  display: block; padding: 0.5em;\n  background: #000; color: #f8f8f8;\n}\n\npre .comment,\npre .template_comment,\npre .javadoc {\n  color: #aeaeae;\n  font-style: italic;\n}\n\npre .keyword,\npre .ruby .function .keyword,\npre .request,\npre .status,\npre .nginx .title {\n  color: #E28964;\n}\n\npre .function .keyword,\npre .sub .keyword,\npre .method,\npre .list .title {\n  color: #99CF50;\n}\n\npre .string,\npre .tag .value,\npre .cdata,\npre .filter .argument,\npre .attr_selector,\npre .apache .cbracket,\npre .date,\npre .tex .command {\n  color: #65B042;\n}\n\npre .subst {\n  color: #DAEFA3;\n}\n\npre .regexp {\n  color: #E9C062;\n}\n\npre .title,\npre .sub .identifier,\npre .pi,\npre .tag,\npre .tag .keyword,\npre .decorator,\npre .shebang,\npre .prompt {\n  color: #89BDFF;\n}\n\npre .class .title,\npre .haskell .type,\npre .smalltalk .class,\npre .javadoctag,\npre .yardoctag,\npre .phpdoc {\n  text-decoration: underline;\n}\n\npre .symbol,\npre .ruby .symbol .string,\npre .number {\n  color: #3387CC;\n}\n\npre .params,\npre .variable,\npre .clojure .attribute {\n  color: #3E87E3;\n}\n\npre .css .tag,\npre .rules .property,\npre .pseudo,\npre .tex .special {\n  color: #CDA869;\n}\n\npre .css .class {\n  color: #9B703F;\n}\n\npre .rules .keyword {\n  color: #C5AF75;\n}\n\npre .rules .value {\n  color: #CF6A4C;\n}\n\npre .css .id {\n  color: #8B98AB;\n}\n\npre .annotation,\npre .apache .sqbracket,\npre .nginx .built_in {\n  color: #9B859D;\n}\n\npre .preprocessor {\n  color: #8996A8;\n}\n\npre .hexcolor,\npre .css .value .number {\n  color: #DD7B3B;\n}\n\npre .css .function {\n  color: #DAD085;\n}\n\npre .diff .header,\npre .chunk,\npre .tex .formula {\n  background-color: #0E2231;\n  color: #F8F8F8;\n  font-style: italic;\n}\n\npre .diff .change {\n  background-color: #4A410D;\n  color: #F8F8F8;\n}\n\npre .addition {\n  background-color: #253B22;\n  color: #F8F8F8;\n}\n\npre .deletion {\n  background-color: #420E09;\n  color: #F8F8F8;\n}\n\npre .coffeescript .javascript,\npre .javascript .xml,\npre .tex .formula,\npre .xml .javascript,\npre .xml .vbscript,\npre .xml .css,\npre .xml .cdata {\n  opacity: 0.5;\n}\n";
-  });
-
-},{"handlebars-runtime":65}],5:[function(require,module,exports){
-var Handlebars = require('handlebars-runtime');
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "";
-
-
-  return buffer;
-  });
-
-},{"handlebars-runtime":65}]},{},[1])
+},{}]},{},[1])
 ;

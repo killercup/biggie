@@ -19,7 +19,12 @@ marked.setOptions({
 // load JS support for CodeMirror
 require('./markdown')(CodeMirror);
 
-var editor = CodeMirror.fromTextArea(document.getElementById('content'), {
+var content = document.getElementById('content');
+if (localStorage.slidesCode) {
+    content.value = localStorage.slidesCode;
+}
+
+var editor = CodeMirror.fromTextArea(content, {
     mode: 'markdown',
     lineWrapping: true,
     tabSize: 2
@@ -92,6 +97,7 @@ function makeSlides() {
 
 function change() {
     slides.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(makeSlides());
+    localStorage.slidesCode = editor.getValue();
 }
 
 change();
