@@ -1,6 +1,7 @@
 var CodeMirror = require('codemirror'),
     tmpl = require('./template.hbs'),
     _ = require('underscore'),
+    hljs = require('highlight.js'),
     marked = require('marked');
 
 var styles = {
@@ -8,6 +9,12 @@ var styles = {
     original: require('./style/original.hbs'),
     zero: require('./style/zero.hbs')
 };
+
+marked.setOptions({
+  highlight: function (code, lang) {
+    return hljs.highlightAuto(code).value;
+  }
+});
 
 // load JS support for CodeMirror
 require('./markdown')(CodeMirror);

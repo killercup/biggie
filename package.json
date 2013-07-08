@@ -9,9 +9,11 @@
   "dependencies": {
     "codemirror": "https://github.com/tmcw/CodeMirror/archive/module-export.tar.gz",
     "marked": "~0.2.9",
+    "highlight.js": "~7.3.0",
     "handlebars-runtime": "~1.0.12",
     "hbsfy": "~0.1.4",
-    "underscore": "~1.4.4"
+    "underscore": "~1.4.4",
+    "browserify": "~2.14.1"
   },
   "repository": "",
   "author": "Tom MacWright <tom@macwright.org>",
