@@ -4,7 +4,11 @@ body {
   background-size:100%;
   color:#fff;
   margin:0;
-  padding:.5em;
+}
+
+.slide {
+  padding: 20px;
+  box-sizing: border-box;;
 }
 
 h1, h2, h3, p {
@@ -34,8 +38,7 @@ mark {
 }
 
 a {
-  background: orange;
-  color:#000;
+  color: orange;
   text-decoration:none;
 }
 
@@ -52,34 +55,13 @@ div {
 }
 
 ol, ul {
-  list-style-type: none;
   margin: 0.5em 0;
-  padding: 0;
+  padding-left: 1em;
+  list-style-type: square;
 }
 
 ul ul, ul ol, ol ol, ol ul {
   margin-left: .5em;
-}
-
-ol li:before, ul li:before {
-  color: orange;
-}
-
-ol {
-  counter-reset: list -1;
-}
-
-ol li {
-  list-style-type: none;
-  counter-increment: list;
-}
-
-ol li:before {
-  content: counter(list, binary) " ";
-}
-
-ul li:before {
-  content: "- ";
 }
 
 /*

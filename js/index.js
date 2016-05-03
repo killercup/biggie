@@ -12,7 +12,12 @@ var styles = {
 
 marked.setOptions({
   highlight: function (code, lang) {
-    return hljs.highlightAuto(code).value;
+    console.log('lang', lang, hljs.LANGUAGES[lang]);
+    if (lang && hljs.LANGUAGES[lang]) {
+      return hljs.highlight(lang, code).value;
+    } else {
+      return hljs.highlightAuto(code).value;
+    }
   }
 });
 
@@ -83,7 +88,7 @@ function makeSlides() {
     var divs = val.split('---').filter(function(v) {
         return v.replace(/\s/g, '');
     }).map(function(v) {
-        return '<div>' + marked(v) + '</div>';
+        return '<div class="slide">' + marked(v) + '</div>';
     }).join('\n');
 
     var page = tmpl({
